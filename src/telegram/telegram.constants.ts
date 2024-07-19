@@ -1,0 +1,2 @@
+export const HOME_SCENE_ID = 'HOME_SCENE_ID';
+export const REGISTER_SCENE_ID = 'REGISTER_SCENE_ID';
