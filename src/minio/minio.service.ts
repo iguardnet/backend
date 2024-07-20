@@ -109,7 +109,13 @@ export class MinioClientService {
       'Content-Type': mime.contentType(path.extname(filePath)),
     };
 
-    await this.client.putObject(bucketName, `${toMinioDir}/${fileName || path.basename(filePath)}`, buffer, metaData);
+    await this.client.putObject(
+      bucketName,
+      `${toMinioDir}/${fileName || path.basename(filePath)}`,
+      buffer,
+      buffer.length,
+      metaData,
+    );
   }
 
   public async getDir(dir: string, bucketName: string = this.bucketName): Promise<BucketItem[]> {
@@ -125,7 +131,7 @@ export class MinioClientService {
       const objects = await objectsList(this.client, this.bucketName, fromMinioDir);
 
       for (const obj of objects) {
-        const filePath = path.join(toLocalDir, cutPath(obj.name, fromMinioDir));
+        const filePath = path.join(toLocalDir, cutPath(obj.name ?? '', fromMinioDir));
         await this.downloadByPath(obj.name, filePath);
       }
     } catch (error) {
