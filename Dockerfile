@@ -11,9 +11,9 @@ RUN apk add --no-cache \
   ca-certificates
 
 # Download and install the Minio client
-# RUN curl -LO https://dl.min.io/client/mc/release/linux-amd64/mc && \
-#     chmod +x mc && \
-#     mv mc /usr/local/bin/
+RUN curl -LO https://dl.min.io/client/mc/release/linux-amd64/mc && \
+    chmod +x mc && \
+    mv mc /usr/local/bin/
 
 RUN curl https://get.acme.sh | sh && \
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt && \

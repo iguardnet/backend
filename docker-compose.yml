@@ -3,7 +3,7 @@ networks:
     external: true
     name: ${NETWORK_NAME}
 services:
-  optinetflow:
+  nest:
     container_name: ${CONTAINER_NAME}
     env_file:
       - .env
