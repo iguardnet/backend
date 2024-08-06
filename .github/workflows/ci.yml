@@ -20,7 +20,6 @@ jobs:
       TAG_LATEST: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.CONTAINER_NAME }}:latest
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
       - name: Checkout
@@ -68,13 +67,7 @@ jobs:
 
 
       - name: Install dependencies
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: |
-          echo "${{ vars.ENV_FILE }}" > .env
-          ls -a
-          cat .env
-          pnpm install
+        run: pnpm install
 
       - name: Cache pnpm modules
         uses: actions/cache@v3
