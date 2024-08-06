@@ -13,15 +13,15 @@ import { UsersService } from './users.service';
 export class UsersResolver {
   constructor(private usersService: UsersService, private prisma: PrismaService) {}
 
-  @UseGuards(GqlAuthGuard)
-  @Query(() => User)
-  me(@UserEntity() user: User) {
-    return this.usersService.getUser(user);
-  }
+  // @UseGuards(GqlAuthGuard)
+  // @Query(() => User)
+  // me(@UserEntity() user: User) {
+  //   return this.usersService.getUser(user);
+  // }
 
-  @UseGuards(GqlAuthGuard)
-  @Mutation(() => User)
-  async changePassword(@UserEntity() user: User, @Args('data') changePassword: ChangePasswordInput) {
-    return this.usersService.changePassword(user.id, user.password, changePassword);
-  }
+  // @UseGuards(GqlAuthGuard)
+  // @Mutation(() => User)
+  // async changePassword(@UserEntity() user: User, @Args('data') changePassword: ChangePasswordInput) {
+  //   return this.usersService.changePassword(user.id, user.password, changePassword);
+  // }
 }

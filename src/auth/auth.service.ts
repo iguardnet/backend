@@ -121,32 +121,32 @@ export class AuthService {
     }
   }
 
-  async login(phone: string, password: string, req: RequestType): Promise<Login> {
-    const user = await this.prisma.user.findUnique({ where: { phone } });
+  // async login(phone: string, password: string, req: RequestType): Promise<Login> {
+  //   const user = await this.prisma.user.findUnique({ where: { phone } });
 
-    if (!user) {
-      throw new NotFoundException(`No user found for phone: ${phone}`);
-    }
+  //   if (!user) {
+  //     throw new NotFoundException(`No user found for phone: ${phone}`);
+  //   }
 
-    const isPasswordValid = await this.passwordService.validatePassword(password, user.password, user);
+  //   const isPasswordValid = await this.passwordService.validatePassword(password, user.password, user);
 
-    if (!isPasswordValid) {
-      throw new BadRequestException('Invalid password');
-    }
+  //   if (!isPasswordValid) {
+  //     throw new BadRequestException('Invalid password');
+  //   }
 
-    const token = this.generateTokens({
-      userId: user.id,
-    });
+  //   const token = this.generateTokens({
+  //     userId: user.id,
+  //   });
 
-    this.setAuthCookie({
-      req,
-      accessToken: token.accessToken,
-      refreshToken: token.refreshToken,
-    });
-    const fullUser = await this.userService.getUser(user);
+  //   this.setAuthCookie({
+  //     req,
+  //     accessToken: token.accessToken,
+  //     refreshToken: token.refreshToken,
+  //   });
+  //   const fullUser = await this.userService.getUser(user);
 
-    return { loggedIn: { tokens: token, user: fullUser } };
-  }
+  //   return { loggedIn: { tokens: token, user: fullUser } };
+  // }
 
   logout(req: RequestType): void {
     req?.res?.clearCookie('token');
@@ -156,12 +156,12 @@ export class AuthService {
     return this.prisma.user.findUnique({ where: { id: userId } });
   }
 
-  getUserFromToken(token: string): Promise<User | null> {
-    const decodedToken = this.jwtService.decode(token);
-    const id = typeof decodedToken === 'object' && decodedToken !== null ? decodedToken?.userId : null;
+  // getUserFromToken(token: string): Promise<User | null> {
+  //   const decodedToken = this.jwtService.decode(token);
+  //   const id = typeof decodedToken === 'object' && decodedToken !== null ? decodedToken?.userId : null;
 
-    return this.prisma.user.findUnique({ where: { id } });
-  }
+  //   return this.prisma.user.findUnique({ where: { id } });
+  // }
 
   generateTokens(payload: { userId: string }): Token {
     return {

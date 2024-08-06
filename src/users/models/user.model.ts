@@ -13,19 +13,28 @@ registerEnumType(Role, {
 
 @ObjectType()
 export class User extends BaseModel {
-  @Field()
+  @Field(() => String, { nullable: true })
   @IsMobilePhone()
-  phone: string;
+  phone?: string | null;
 
-  @Field(() => String)
-  firstname: string;
+  @Field(() => String, { nullable: true })
+  firstname?: string | null;
 
-  @Field(() => String)
-  lastname: string;
+  @Field(() => String, { nullable: true })
+  lastname?: string | null;
 
   @Field(() => Role)
   role: Role;
 
   @HideField()
-  password: string;
+  password?: string | null;
+
+  @Field(() => String, { nullable: true })
+  firebaseId?: string | null;
+
+  @Field(() => String, { nullable: true })
+  email?: string | null;
+
+  @Field(() => String, { nullable: true })
+  deviceId?: string | null;
 }

@@ -20,20 +20,20 @@ export class OptionalGqlAuthGuard extends AuthGuard('jwt') {
     super();
   }
 
-  async canActivate(context: ExecutionContext) {
-    const ctx = GqlExecutionContext.create(context);
-    const req = ctx.getContext().req;
+  // async canActivate(context: ExecutionContext) {
+  //   const ctx = GqlExecutionContext.create(context);
+  //   const req = ctx.getContext().req;
 
-    // console.log('req.cookies.token.accessT', JSON.parse(req.cookies.token).accessT);
-    const token = req?.cookies?.token && JSON.parse(req.cookies.token).accessT;
+  //   // console.log('req.cookies.token.accessT', JSON.parse(req.cookies.token).accessT);
+  //   const token = req?.cookies?.token && JSON.parse(req.cookies.token).accessT;
 
-    if (token) {
-      const user = await this.authService.getUserFromToken(token);
-      req.user = user;
-    }
+  //   if (token) {
+  //     const user = await this.authService.getUserFromToken(token);
+  //     req.user = user;
+  //   }
 
-    return true;
-  }
+  //   return true;
+  // }
 
   getRequest(context: ExecutionContext) {
     const gqlContext = GqlExecutionContext.create(context);

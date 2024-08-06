@@ -8,9 +8,9 @@ generator client {
   // previewFeatures = []
 }
 
-// generator dbml {
-//   provider = "prisma-dbml-generator"
-// }
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
 
 enum Role {
   ADMIN
