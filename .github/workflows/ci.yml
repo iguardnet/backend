@@ -69,7 +69,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
+          echo "${{ vars.ENV_FILE }}" > .env
           pnpm install
 
       - name: Cache pnpm modules
