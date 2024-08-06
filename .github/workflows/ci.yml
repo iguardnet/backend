@@ -64,9 +64,13 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: ${{ runner.os }}-pnpm-store-
 
-      - name: Load environment variables
+      - name: Load environment variables from .env file
         run: |
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
+          echo "Loading .env file"
+          npm install dotenv
+          node -e "require('dotenv').config()"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
 
       - name: Install dependencies
