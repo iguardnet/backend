@@ -20,7 +20,6 @@ jobs:
       TAG_LATEST: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.CONTAINER_NAME }}:latest
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      DATABASE_URL: postgresql://iguard_user:WZKxMkzZGFqE3yDsE3vAq@postgres:5432/iguard_db?pgbouncer=true&pool_timeout=20
 
     steps:
       - name: Checkout
@@ -64,6 +63,11 @@ jobs:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: ${{ runner.os }}-pnpm-store-
+
+      - name: Load environment variables
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
+
 
       - name: Install dependencies
         run: pnpm install
