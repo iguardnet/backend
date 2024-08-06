@@ -74,7 +74,7 @@ jobs:
           key: ${{ runner.os }}-pnpm-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Generate prisma client
-        run: pnpm prisma generate
+        run: pnpm prisma:generate
 
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
