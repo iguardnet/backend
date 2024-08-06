@@ -68,6 +68,8 @@ jobs:
 
 
       - name: Install dependencies
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           echo "${{ vars.ENV_FILE }}" > .env
           ls -a
