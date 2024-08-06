@@ -70,6 +70,8 @@ jobs:
       - name: Install dependencies
         run: |
           echo "${{ vars.ENV_FILE }}" > .env
+          ls -a
+          cat .env
           pnpm install
 
       - name: Cache pnpm modules
