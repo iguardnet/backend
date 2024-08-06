@@ -20,6 +20,7 @@ jobs:
       TAG_LATEST: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.CONTAINER_NAME }}:latest
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
       - name: Checkout
@@ -64,17 +65,12 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: ${{ runner.os }}-pnpm-store-
 
-      - name: Load environment variables from .env file
-        run: |
-          echo "Loading .env file"
-          npm install dotenv
-          node -e "require('dotenv').config()"
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
 
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
+          pnpm install
 
       - name: Cache pnpm modules
         uses: actions/cache@v3
