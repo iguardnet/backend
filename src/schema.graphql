@@ -2,15 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Auth {
-  """JWT access token"""
-  accessToken: JWT!
-
-  """JWT refresh token"""
-  refreshToken: JWT!
-  user: User!
-}
-
 input ChangePasswordInput {
   newPassword: String!
   oldPassword: String!
@@ -21,35 +12,14 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-"""
-A field whose value is a JSON Web Token (JWT): https://jwt.io/introduction.
-"""
-scalar JWT
-
-type Login {
-  loggedIn: LoginData
-}
-
-type LoginData {
-  tokens: Token!
-  user: User!
-}
-
-input LoginInput {
-  password: String!
-  phone: String!
-}
-
 type Mutation {
   changePassword(data: ChangePasswordInput!): User!
-  login(data: LoginInput!): Login!
-  logout: Boolean!
-  refreshToken(token: JWT!): Token!
-  signup(data: SignupInput!): Auth!
+  setFirebaseId(input: SetFirebaseIdInput!): String!
   uploadImage(input: UploadInput!): String!
 }
 
 type Query {
+  getCustomToken(deviceId: String!): String!
   hello(name: String!): String!
   helloWorld: String!
   me: User!
@@ -58,22 +28,13 @@ type Query {
 """User role"""
 enum Role {
   ADMIN
+  PRO_USER
   USER
 }
 
-input SignupInput {
-  firstname: String!
-  lastname: String!
-  password: String!
-  phone: String!
-}
-
-type Token {
-  """JWT access token"""
-  accessToken: JWT!
-
-  """JWT refresh token"""
-  refreshToken: JWT!
+input SetFirebaseIdInput {
+  deviceId: String!
+  firebaseId: String!
 }
 
 """The `Upload` scalar type represents a file upload."""

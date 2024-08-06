@@ -1,5 +1,5 @@
 services:
-  optinetflow:
+  nest:
     env_file:
       - .env
     build:

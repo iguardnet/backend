@@ -15,11 +15,12 @@ import { Telegraf } from 'telegraf';
 import { v4 as uuid } from 'uuid';
 
 import { SecurityConfig } from '../common/configs/config.interface';
-import { omit } from '../common/helpers';
+import { FirebaseConfig } from '../common/configs/firebase.config';
 import { Context } from '../common/interfaces/context.interface';
 import { User } from '../users/models/user.model';
 import { UsersService } from '../users/users.service';
 import { TokenCookie } from './dto/jwt.dto';
+import { SetFirebaseIdInput } from './dto/setFirebaseId.input';
 import { SignupInput } from './dto/signup.input';
 import { Login } from './models/login.model';
 import { Token } from './models/token.model';
@@ -35,9 +36,51 @@ export class AuthService {
     private readonly passwordService: PasswordService,
     private readonly configService: ConfigService,
     private readonly userService: UsersService,
-  ) {}
+    private firebaseConfig: FirebaseConfig,
+  ) {
+    // setTimeout(() => {
+    //   void (async () => {
+    //     await this.getCustomToken('AmzsEKEMLRTEJ9iEi3WU7Op4ysE3');
+    //   })();
+    // }, 1000);
+  }
 
   private readonly reportGroupId = this.configService.get('telGroup')!.report;
+
+  async getCustomToken(deviceId: string): Promise<string> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        deviceId,
+        email: null,
+      },
+    });
+    const firebaseId = user?.firebaseId;
+
+    if (!firebaseId) {
+      throw new NotFoundException('DeviceId not found!');
+    }
+
+    try {
+      return await this.firebaseConfig.getAuth().createCustomToken(firebaseId);
+    } catch {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
+
+  async setFirebaseId(input: SetFirebaseIdInput): Promise<void> {
+    try {
+      await this.prisma.user.create({
+        data: {
+          firebaseId: input.firebaseId,
+          deviceId: input.deviceId,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+
+      throw new BadRequestException('This firebaseId is already exist.');
+    }
+  }
 
   async createUser(payload: SignupInput, req: RequestType): Promise<Token> {
     const id = uuid();
