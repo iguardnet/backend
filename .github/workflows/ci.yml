@@ -91,7 +91,7 @@ jobs:
           DB_PORT: ${{ secrets.DB_PORT }}
         run: |
           ssh -fN -L 1111:localhost:${DB_PORT} -o StrictHostKeyChecking=no $SERVER_USERNAME@$SERVER_IP -p $SERVER_PORT 2>&1
-          pnpm run migrate:deploy
+          pnpm run migrate:deploy:run
 
       - name: 'Create id_rsa file'
         run: echo "${{ secrets.ID_RSA }}" > id_rsa
