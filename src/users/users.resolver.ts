@@ -5,7 +5,7 @@ import { PrismaService } from 'nestjs-prisma';
 import { GqlAuthGuard } from '../auth/gql-auth.guard';
 import { UserEntity } from '../common/decorators/user.decorator';
 import { ChangePasswordInput } from './dto/change-password.input';
-import { User } from './models/user.model';
+import { User, UserWithClientInfo } from './models/user.model';
 import { UsersService } from './users.service';
 
 @Resolver(() => User)
@@ -13,11 +13,11 @@ import { UsersService } from './users.service';
 export class UsersResolver {
   constructor(private usersService: UsersService, private prisma: PrismaService) {}
 
-  // @UseGuards(GqlAuthGuard)
-  // @Query(() => User)
-  // me(@UserEntity() user: User) {
-  //   return this.usersService.getUser(user);
-  // }
+  @UseGuards(GqlAuthGuard)
+  @Query(() => UserWithClientInfo)
+  me(@UserEntity() user: User): Promise<UserWithClientInfo> {
+    return this.usersService.getUser(user);
+  }
 
   // @UseGuards(GqlAuthGuard)
   // @Mutation(() => User)

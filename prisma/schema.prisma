@@ -39,6 +39,15 @@ model User {
   emailVerified  Boolean?
 }
 
+
+model ClientInfo {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  android        Json?
+  ios            Json?
+}
+
 model File {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime @default(now())
