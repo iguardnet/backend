@@ -4,6 +4,9 @@ import { IsNotEmpty } from 'class-validator';
 @InputType()
 export class SetFirebaseIdInput {
   @Field()
+  firebaseToken: string;
+
+  @Field()
   @IsNotEmpty()
   firebaseId: string;
 

@@ -2,18 +2,32 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input ChangePasswordInput {
-  newPassword: String!
-  oldPassword: String!
-}
-
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
 
+"""
+A field whose value is a JSON Web Token (JWT): https://jwt.io/introduction.
+"""
+scalar JWT
+
+type Login {
+  loggedIn: LoginData
+}
+
+type LoginData {
+  tokens: Token!
+  user: User!
+}
+
+input LoginInput {
+  deviceId: String
+  firebaseToken: String!
+}
+
 type Mutation {
-  changePassword(data: ChangePasswordInput!): User!
+  login(input: LoginInput!): Login!
   setFirebaseId(input: SetFirebaseIdInput!): String!
   uploadImage(input: UploadInput!): String!
 }
@@ -22,7 +36,6 @@ type Query {
   getCustomToken(deviceId: String!): String!
   hello(name: String!): String!
   helloWorld: String!
-  me: User!
 }
 
 """User role"""
@@ -35,6 +48,22 @@ enum Role {
 input SetFirebaseIdInput {
   deviceId: String!
   firebaseId: String!
+  firebaseToken: String!
+}
+
+"""SignInProvider"""
+enum SignInProvider {
+  ANONYMOUS
+  GOOGLE
+  PASSWORD
+}
+
+type Token {
+  """JWT access token"""
+  accessToken: JWT!
+
+  """JWT refresh token"""
+  refreshToken: JWT!
 }
 
 """The `Upload` scalar type represents a file upload."""
@@ -47,11 +76,15 @@ input UploadInput {
 type User {
   """Identifies the date and time when the object was created."""
   createdAt: DateTime!
-  firstname: String!
+  deviceId: String
+  email: String
+  emailVerified: Boolean
+  firebaseId: String
   id: ID!
-  lastname: String!
-  phone: String!
+  name: String
+  phone: String
   role: Role!
+  signInProvider: SignInProvider
 
   """Identifies the date and time when the object was last updated."""
   updatedAt: DateTime!

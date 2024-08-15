@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 
 import { Field, Float, HideField, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
-import { Role } from '@prisma/client';
+import { Role, SignInProvider } from '@prisma/client';
 import { IsMobilePhone } from 'class-validator';
 
 import { BaseModel } from '../../common/models/base.model';
@@ -11,6 +11,11 @@ registerEnumType(Role, {
   description: 'User role',
 });
 
+registerEnumType(SignInProvider, {
+  name: 'SignInProvider',
+  description: 'SignInProvider',
+});
+
 @ObjectType()
 export class User extends BaseModel {
   @Field(() => String, { nullable: true })
@@ -18,10 +23,7 @@ export class User extends BaseModel {
   phone?: string | null;
 
   @Field(() => String, { nullable: true })
-  firstname?: string | null;
-
-  @Field(() => String, { nullable: true })
-  lastname?: string | null;
+  name?: string | null;
 
   @Field(() => Role)
   role: Role;
@@ -37,4 +39,10 @@ export class User extends BaseModel {
 
   @Field(() => String, { nullable: true })
   deviceId?: string | null;
+
+  @Field(() => SignInProvider, { nullable: true })
+  signInProvider?: SignInProvider | null;
+
+  @Field(() => Boolean, { nullable: true })
+  emailVerified?: boolean | null;
 }

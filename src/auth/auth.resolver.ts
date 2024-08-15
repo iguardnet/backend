@@ -41,10 +41,10 @@ export class AuthResolver {
   //   };
   // }
 
-  // @Mutation(() => Login)
-  // async login(@Args('data') { phone, password }: LoginInput, @Context() context: { req: RequestType }): Promise<Login> {
-  //   return this.auth.login(phone.toLowerCase(), password, context.req);
-  // }
+  @Mutation(() => Login)
+  async login(@Args('input') input: LoginInput, @Context() context: { req: RequestType }): Promise<Login> {
+    return this.auth.login(input, context.req);
+  }
 
   // @UseGuards(GqlAuthGuard)
   // @Mutation(() => Boolean)
@@ -54,10 +54,10 @@ export class AuthResolver {
   //   return true;
   // }
 
-  // @Mutation(() => Token)
-  // refreshToken(@Args() { token }: RefreshTokenInput) {
-  //   return this.auth.refreshToken(token);
-  // }
+  @Mutation(() => Token)
+  refreshToken(@Args() { token }: RefreshTokenInput) {
+    return this.auth.refreshToken(token);
+  }
 
   // @ResolveField('user', () => User)
   // async user(@Parent() auth: Auth) {

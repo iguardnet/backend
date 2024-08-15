@@ -3,12 +3,19 @@ import { IsNotEmpty, Matches, MinLength } from 'class-validator';
 
 @InputType()
 export class LoginInput {
-  @Field()
-  @Matches(/^9\d{9}$/)
-  phone: string;
+  // @Field()
+  // @Matches(/^9\d{9}$/)
+  // phone: string;
+
+  // @Field()
+  // @IsNotEmpty()
+  // @MinLength(4)
+  // password: string;
 
   @Field()
   @IsNotEmpty()
-  @MinLength(4)
-  password: string;
+  firebaseToken: string;
+
+  @Field(() => String, { nullable: true })
+  deviceId?: string | null;
 }

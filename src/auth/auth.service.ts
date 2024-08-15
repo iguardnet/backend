@@ -1,13 +1,7 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Prisma } from '@prisma/client';
+import { SignInProvider } from '@prisma/client';
 import type { Request as RequestType } from 'express';
 import { PrismaService } from 'nestjs-prisma';
 import { InjectBot } from 'nestjs-telegraf';
@@ -20,12 +14,20 @@ import { Context } from '../common/interfaces/context.interface';
 import { User } from '../users/models/user.model';
 import { UsersService } from '../users/users.service';
 import { TokenCookie } from './dto/jwt.dto';
+import { LoginInput } from './dto/login.input';
 import { SetFirebaseIdInput } from './dto/setFirebaseId.input';
 import { SignupInput } from './dto/signup.input';
 import { Login } from './models/login.model';
 import { Token } from './models/token.model';
 import { PasswordService } from './password.service';
 
+/* eslint-disable @typescript-eslint/naming-convention */
+const mapSignInProvider = {
+  password: SignInProvider.PASSWORD,
+  'google.com': SignInProvider.GOOGLE,
+  anonymous: SignInProvider.ANONYMOUS,
+};
+/* eslint-enable */
 @Injectable()
 export class AuthService {
   constructor(
@@ -51,7 +53,7 @@ export class AuthService {
     const user = await this.prisma.user.findFirst({
       where: {
         deviceId,
-        email: null,
+        signInProvider: SignInProvider.ANONYMOUS,
       },
     });
     const firebaseId = user?.firebaseId;
@@ -82,44 +84,44 @@ export class AuthService {
     }
   }
 
-  async createUser(payload: SignupInput, req: RequestType): Promise<Token> {
-    const id = uuid();
+  // async createUser(payload: SignupInput, req: RequestType): Promise<Token> {
+  //   const id = uuid();
 
-    const hashedPassword = await this.passwordService.hashPassword(payload.password);
+  //   const hashedPassword = await this.passwordService.hashPassword(payload.password);
 
-    try {
-      const newUser = await this.prisma.user.create({
-        data: {
-          firstname: payload.firstname,
-          lastname: payload.lastname,
-          phone: payload.phone,
-          id,
-          password: hashedPassword,
-        },
-      });
+  //   try {
+  //     const newUser = await this.prisma.user.create({
+  //       data: {
+  //         firstname: payload.firstname,
+  //         lastname: payload.lastname,
+  //         phone: payload.phone,
+  //         id,
+  //         password: hashedPassword,
+  //       },
+  //     });
 
-      const reportCaption = `#register\n👤 ${newUser.firstname} ${newUser.lastname}\n📞 Mobile: +98${newUser.phone}\n\n`;
-      void this.bot.telegram.sendMessage(this.reportGroupId, reportCaption);
+  //     const reportCaption = `#register\n👤 ${newUser.firstname} ${newUser.lastname}\n📞 Mobile: +98${newUser.phone}\n\n`;
+  //     void this.bot.telegram.sendMessage(this.reportGroupId, reportCaption);
 
-      const token = this.generateTokens({
-        userId: newUser.id,
-      });
+  //     const token = this.generateTokens({
+  //       userId: newUser.id,
+  //     });
 
-      this.setAuthCookie({
-        req,
-        accessToken: token.accessToken,
-        refreshToken: token.refreshToken,
-      });
+  //     this.setAuthCookie({
+  //       req,
+  //       accessToken: token.accessToken,
+  //       refreshToken: token.refreshToken,
+  //     });
 
-      return token;
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-        throw new ConflictException(`Phone ${payload.phone} already used.`);
-      }
+  //     return token;
+  //   } catch (error) {
+  //     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+  //       throw new ConflictException(`Phone ${payload.phone} already used.`);
+  //     }
 
-      throw new Error(error as string);
-    }
-  }
+  //     throw new Error(error as string);
+  //   }
+  // }
 
   // async login(phone: string, password: string, req: RequestType): Promise<Login> {
   //   const user = await this.prisma.user.findUnique({ where: { phone } });
@@ -148,6 +150,57 @@ export class AuthService {
   //   return { loggedIn: { tokens: token, user: fullUser } };
   // }
 
+  async login(input: LoginInput, req: RequestType): Promise<Login> {
+    const firebase = await this.firebaseConfig.getAuth().verifyIdToken(input.firebaseToken);
+
+    const user = await this.prisma.user.findUnique({ where: { firebaseId: firebase.uid } });
+    const finalUser = await (!user
+      ? this.prisma.user.create({
+          data: {
+            firebaseId: firebase.uid,
+            ...(input.deviceId && { deviceId: input.deviceId }),
+            ...(firebase.name && { name: firebase.name }),
+            ...(firebase.email && { email: firebase.email }),
+            ...(firebase.email_verified && { emailVerified: firebase.email_verified }),
+            ...(firebase.phone_number && { phone: firebase.phone_number }),
+            ...(firebase.firebase.sign_in_provider && {
+              signInProvider: mapSignInProvider[firebase.firebase.sign_in_provider],
+            }),
+          },
+        })
+      : this.prisma.user.update({
+          data: {
+            ...(input.deviceId && { deviceId: input.deviceId }),
+            ...(firebase.name && { name: firebase.name }),
+            ...(firebase.email && { email: firebase.email }),
+            ...(firebase.email_verified && { emailVerified: firebase.email_verified }),
+            ...(firebase.phone_number && { phone: firebase.phone_number }),
+            ...(firebase.firebase.sign_in_provider && {
+              signInProvider: mapSignInProvider[firebase.firebase.sign_in_provider],
+            }),
+          },
+          where: {
+            id: user.id,
+          },
+        }));
+    const token = this.generateTokens({
+      userId: finalUser.id,
+    });
+
+    this.setAuthCookie({
+      req,
+      accessToken: token.accessToken,
+      refreshToken: token.refreshToken,
+    });
+
+    return {
+      loggedIn: {
+        tokens: token,
+        user: finalUser,
+      },
+    };
+  }
+
   logout(req: RequestType): void {
     req?.res?.clearCookie('token');
   }
@@ -156,12 +209,12 @@ export class AuthService {
     return this.prisma.user.findUnique({ where: { id: userId } });
   }
 
-  // getUserFromToken(token: string): Promise<User | null> {
-  //   const decodedToken = this.jwtService.decode(token);
-  //   const id = typeof decodedToken === 'object' && decodedToken !== null ? decodedToken?.userId : null;
+  async getUserFromToken(token: string): Promise<User | null> {
+    const decodedToken = this.jwtService.decode(token);
+    const id = typeof decodedToken === 'object' && decodedToken !== null ? decodedToken?.userId : null;
 
-  //   return this.prisma.user.findUnique({ where: { id } });
-  // }
+    return this.prisma.user.findUnique({ where: { id } });
+  }
 
   generateTokens(payload: { userId: string }): Token {
     return {
