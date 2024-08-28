@@ -23,6 +23,7 @@ Table ClientInfo {
   updatedAt DateTime [not null]
   android Json
   ios Json
+  subscription Json
 }
 
 Table File {

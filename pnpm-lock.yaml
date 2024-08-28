@@ -71,6 +71,9 @@ importers:
       firebase-admin:
         specifier: ^12.3.0
         version: 12.3.0
+      googleapis:
+        specifier: ^142.0.0
+        version: 142.0.0
       graphql:
         specifier: 16.7.1
         version: 16.7.1
@@ -2940,6 +2943,14 @@ packages:
     resolution: {integrity: sha512-SKAQKtvdjtNW3PMOhmKEqpQP+2C5ZqNKfwWxy70efpSwxvRYuAcgMJs6aRHTBPJjz3SO6ZbiXwM6WIuGYFZ7LQ==}
     engines: {node: '>=14'}
 
+  googleapis-common@7.2.0:
+    resolution: {integrity: sha512-/fhDZEJZvOV3X5jmD+fKxMqma5q2Q9nZNSF3kn1F18tpxmA86BcTxAGBQdM0N89Z3bEaIs+HVznSmFJEAmMTjA==}
+    engines: {node: '>=14.0.0'}
+
+  googleapis@142.0.0:
+    resolution: {integrity: sha512-LsU1ynez4/KNPwnFMSDI93pBEsETNdQPCrT3kz2qgiNg5H2pW4dKW+1VmENMkZ4u9lMxA89nnXD3nqWBJ0rruQ==}
+    engines: {node: '>=14.0.0'}
+
   gopd@1.0.1:
     resolution: {integrity: sha512-d65bNlIadxvpb/A2abVdlqKqV563juRnZ1Wtk6s1sIR8uNsXR70xqIzVqxVf1eTqDunwT2MkczEeaezCKTZhwA==}
 
@@ -5060,6 +5071,9 @@ packages:
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
+
+  url-template@2.0.8:
+    resolution: {integrity: sha512-XdVKMF4SJ0nP/O7XIPB0JwAEuT9lDIYnNsK8yGVe43y0AWoKeJNdv3ZNWh7ksJ6KqQFjOO6ox/VEitLnaVNufw==}
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
@@ -7373,8 +7387,7 @@ snapshots:
       - encoding
       - supports-color
 
-  bignumber.js@9.1.2:
-    optional: true
+  bignumber.js@9.1.2: {}
 
   bin-check@4.1.0:
     dependencies:
@@ -8320,8 +8333,7 @@ snapshots:
       ext-list: 2.2.2
       sort-keys-length: 1.0.1
 
-  extend@3.0.2:
-    optional: true
+  extend@3.0.2: {}
 
   external-editor@3.1.0:
     dependencies:
@@ -8577,7 +8589,6 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
-    optional: true
 
   gcp-metadata@6.1.0:
     dependencies:
@@ -8586,7 +8597,6 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
-    optional: true
 
   gensync@1.0.0-beta.2: {}
 
@@ -8685,7 +8695,6 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
-    optional: true
 
   google-gax@4.3.8:
     dependencies:
@@ -8705,6 +8714,26 @@ snapshots:
       - encoding
       - supports-color
     optional: true
+
+  googleapis-common@7.2.0:
+    dependencies:
+      extend: 3.0.2
+      gaxios: 6.7.0
+      google-auth-library: 9.13.0
+      qs: 6.12.3
+      url-template: 2.0.8
+      uuid: 9.0.1
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+
+  googleapis@142.0.0:
+    dependencies:
+      google-auth-library: 9.13.0
+      googleapis-common: 7.2.0
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
 
   gopd@1.0.1:
     dependencies:
@@ -8776,7 +8805,6 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
-    optional: true
 
   has-bigints@1.0.2: {}
 
@@ -8873,7 +8901,6 @@ snapshots:
       debug: 4.3.5
     transitivePeerDependencies:
       - supports-color
-    optional: true
 
   human-signals@1.1.1: {}
 
@@ -9463,7 +9490,6 @@ snapshots:
   json-bigint@1.0.0:
     dependencies:
       bignumber.js: 9.1.2
-    optional: true
 
   json-buffer@3.0.1: {}
 
@@ -9524,7 +9550,6 @@ snapshots:
       buffer-equal-constant-time: 1.0.1
       ecdsa-sig-formatter: 1.0.11
       safe-buffer: 5.2.1
-    optional: true
 
   jwks-rsa@3.1.0:
     dependencies:
@@ -9546,7 +9571,6 @@ snapshots:
     dependencies:
       jwa: 2.0.0
       safe-buffer: 5.2.1
-    optional: true
 
   keyv@4.5.4:
     dependencies:
@@ -11038,6 +11062,8 @@ snapshots:
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
+
+  url-template@2.0.8: {}
 
   util-deprecate@1.0.2: {}
 

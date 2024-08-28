@@ -42,7 +42,7 @@ export class AuthService {
   ) {
     // setTimeout(() => {
     //   void (async () => {
-    //     await this.getCustomToken('AmzsEKEMLRTEJ9iEi3WU7Op4ysE3');
+    //     await this.verifyPurchase('mkhpljkcdagiainjejopnjei.AO-J1Oz6e1iFVMHBgkBiIQGyVIr_H8Vfu98llOikxD52IyoJyy-Ayinu4r-iIwGcVz0pZ__Z_yj0fWqA-dshmAfUEGuBxRQApA', 'com.iguard.vpn', 'monthly_subscription');
     //   })();
     // }, 1000);
   }
@@ -199,6 +199,29 @@ export class AuthService {
         user: finalUser,
       },
     };
+  }
+
+  async verifyPurchase(purchaseToken: string, packageName: string, productId: string) {
+    const client = this.firebaseConfig.getPlayDeveloperApiClient();
+
+    try {
+      const response = await client.purchases.products.get({
+        packageName,
+        productId,
+        token: purchaseToken,
+      });
+
+      console.log('response  ===========>', response);
+
+      const purchase = response.data;
+
+      // Handle the purchase object here (e.g., verify purchase state, handle expiration)
+      return purchase.purchaseState === 0;
+    } catch (error) {
+      console.error('Error verifying purchase:', error);
+
+      return false;
+    }
   }
 
   logout(req: RequestType): void {

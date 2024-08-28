@@ -56,6 +56,9 @@ export class ClientInfo extends BaseModel {
 
   @Field(() => GraphQLJSON, { nullable: true })
   ios?: Prisma.JsonValue | null;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  subscription?: Prisma.JsonValue | null;
 }
 
 @ObjectType()
