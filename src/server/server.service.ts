@@ -32,6 +32,8 @@ export class ServerService {
 
   private readonly backupGroup = this.configService.get<TelGroup>('telGroup')!.backup;
 
+  private readonly reportGroup = this.configService.get<TelGroup>('telGroup')!.report;
+
   // async issueCert(data: IssueCertInput): Promise<Domain> {
   //   const domain = data.domain;
 
@@ -282,6 +284,8 @@ export class ServerService {
       }
 
       postgresLogs += '\nPostgres backup finished with some errors.';
+
+      void this.bot.telegram.sendMessage(this.reportGroup, `Couldn't get backup from Postgres.\n\n${postgresLogs}`);
     }
 
     return postgresLogs;
