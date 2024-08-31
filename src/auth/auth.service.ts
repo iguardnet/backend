@@ -211,7 +211,7 @@ export class AuthService {
         token: purchaseToken,
       });
 
-      console.log('response  ===========>', response);
+      console.info('response  ===========>', response);
 
       const purchase = response.data;
 

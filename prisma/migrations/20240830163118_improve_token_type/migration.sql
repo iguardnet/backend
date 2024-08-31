@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Server" ALTER COLUMN "token" SET DATA TYPE TEXT;

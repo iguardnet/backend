@@ -244,14 +244,14 @@ export function jsonToB64Url(json: Record<string, string>): string {
 
 export const extractFileName = (pathStr?: string | null) => pathStr && path.basename(pathStr, path.extname(pathStr));
 
-export function bytesToGB(bytes: number): number {
-  const gigabyte = 1024 * 1024 * 1024; // 1 gigabyte = 1024 megabytes * 1024 kilobytes * 1024 bytes
+export function bytesToGB(bytes: bigint): bigint {
+  const gigabyte = BigInt(1024 * 1024 * 1024); // 1 gigabyte = 1024 megabytes * 1024 kilobytes * 1024 bytes
 
   return bytes / gigabyte;
 }
 
-export function bytesToMB(bytes: number): number {
-  const megabyte = 1024 * 1024; // 1 gigabyte = 1024 megabytes * 1024 kilobytes * 1024 bytes
+export function bytesToMB(bytes: bigint): bigint {
+  const megabyte = BigInt(1024 * 1024); // 1 gigabyte = 1024 megabytes * 1024 kilobytes * 1024 bytes
 
   return bytes / megabyte;
 }

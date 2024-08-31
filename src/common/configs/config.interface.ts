@@ -13,6 +13,7 @@ export interface Config {
   minio: MinioConfig;
   telegraf: Telegraf;
   telGroup: TelGroup;
+  xui: XUI;
 }
 
 export interface NestConfig {
@@ -72,4 +73,8 @@ export interface Telegraf {
 export interface TelGroup {
   report: string;
   backup: string;
+}
+
+export interface XUI {
+  password: string;
 }

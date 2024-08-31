@@ -5,12 +5,12 @@ import { Telegraf } from 'telegraf';
 import { TelegrafExceptionFilter } from '../common/filters/telegraf-exception.filter';
 import { AdminGuard } from '../common/guards/admin.guard';
 import { b64UrlToJson } from '../common/helpers';
-import { ResponseTimeInterceptor } from '../common/interceptors/response-time.interceptor';
+// import { ResponseTimeInterceptor } from '../common/interceptors/response-time.interceptor';
 import { Context } from '../common/interfaces/context.interface';
 import { TelegramService } from './telegram.service';
 
 @Update()
-@UseInterceptors(ResponseTimeInterceptor)
+// @UseInterceptors(ResponseTimeInterceptor)
 @UseFilters(TelegrafExceptionFilter)
 export class TelegramUpdate {
   constructor(private readonly telegramService: TelegramService) {}

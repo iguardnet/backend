@@ -2,6 +2,9 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+"""A custom scalar type for big numbers"""
+scalar BigNumber
+
 type ClientInfo {
   android: JSON
 
@@ -9,6 +12,34 @@ type ClientInfo {
   createdAt: DateTime!
   id: ID!
   ios: JSON
+  subscription: JSON
+
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+}
+
+type ClientStat {
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  down: BigNumber!
+  email: String!
+  enable: Boolean!
+  expiryTime: BigNumber!
+  id: ID!
+  total: BigNumber!
+  up: BigNumber!
+
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+}
+
+type Connection {
+  config: String!
+  country: ServerCountry!
+
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  id: ID!
 
   """Identifies the date and time when the object was last updated."""
   updatedAt: DateTime!
@@ -18,6 +49,10 @@ type ClientInfo {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+input GetClientStatsFiltersInput {
+  id: String!
+}
 
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
@@ -44,6 +79,7 @@ input LoginInput {
 }
 
 type Mutation {
+  getConnection(country: ServerCountry!): Connection!
   login(input: LoginInput!): Login!
   refreshToken(token: JWT!): Token!
   setFirebaseId(input: SetFirebaseIdInput!): String!
@@ -51,10 +87,13 @@ type Mutation {
 }
 
 type Query {
+  clientStats(filters: GetClientStatsFiltersInput!): [ClientStat!]!
   getCustomToken(deviceId: String!): String!
+  getUsage: TrafficUsage!
   hello(name: String!): String!
   helloWorld: String!
   me: UserWithClientInfo!
+  servers: [Server!]!
 }
 
 """User role"""
@@ -62,6 +101,29 @@ enum Role {
   ADMIN
   PRO_USER
   USER
+}
+
+type Server {
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  id: ID!
+  ip: String!
+  isPremium: Boolean!
+  type: ServerCountry!
+
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+}
+
+"""ServerCountry"""
+enum ServerCountry {
+  DE
+  FI
+  IR
+  NL
+  SG
+  TR
+  US
 }
 
 input SetFirebaseIdInput {
@@ -83,6 +145,19 @@ type Token {
 
   """JWT refresh token"""
   refreshToken: JWT!
+}
+
+type TrafficUsage {
+  byte: BigNumber!
+
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  gigabyte: BigNumber!
+  id: ID!
+  megabyte: BigNumber!
+
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
 }
 
 """The `Upload` scalar type represents a file upload."""

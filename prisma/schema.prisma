@@ -37,6 +37,8 @@ model User {
   deviceId       String?         @db.VarChar(255)
   signInProvider SignInProvider?
   emailVerified  Boolean?
+
+  ClientStat ClientStat[]
 }
 
 // android
@@ -45,12 +47,12 @@ model User {
 //   "foreUpdateVersion": "1.1.0"
 // }
 model ClientInfo {
-  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  android        Json?
-  ios            Json?
-  subscription   Json?
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  android      Json?
+  ios          Json?
+  subscription Json?
 }
 
 model File {
@@ -62,3 +64,93 @@ model File {
 
   @@index([userId], name: "FileUserIdIndex")
 }
+
+enum ServerCountry {
+  IR
+  NL
+  DE
+  TR
+  FI
+  US
+  SG
+}
+
+model Server {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+  type         ServerCountry
+  ip           String        @db.VarChar(255)
+  domain       String        @db.VarChar(255)
+  inboundId    Int           @default(1)
+  token        String
+  tunnelDomain String        @db.VarChar(255)
+  stats        Json?
+  isPremium    Boolean       @default(true)
+
+  clientStat ClientStat[]
+}
+
+model ClientStat {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  serverId        String    @db.Uuid
+  userId          String    @db.Uuid
+  lastTotalUsage  BigInt?
+  lastConnectedAt DateTime?
+  expiryTime      BigInt
+  total           BigInt
+  down            BigInt
+  up              BigInt
+  email           String    @db.VarChar(255)
+  enable          Boolean
+  flow            String    @db.VarChar(255)
+  subId           String    @db.VarChar(255)
+  tgId            String    @db.VarChar(255)
+  limitIp         Int
+
+  user   User   @relation(fields: [userId], references: [id])
+  server Server @relation(fields: [serverId], references: [id])
+
+  @@index([serverId], name: "ClientStatServerIdIndex")
+  @@index([userId], name: "ClientStatUserIdIndex")
+  @@index([expiryTime], name: "ClientStatExpiryTimeIndex")
+  @@index([total], name: "ClientStatTotalIndex")
+  @@index([down], name: "ClientStatDownIndex")
+  @@index([up], name: "ClientStatUpIndex")
+  @@index([deletedAt], name: "ClientDeletedAtIndex")
+}
+
+// model UserPackage {
+//   id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   createdAt      DateTime  @default(now())
+//   updatedAt      DateTime  @updatedAt
+//   deletedAt      DateTime?
+//   name           String    @db.VarChar(255)
+//   userId         String    @db.Uuid
+//   serverId       String    @db.Uuid
+//   statId         String    @db.Uuid
+//   lastTotalUsage BigInt?
+
+//   user   User       @relation(fields: [userId], references: [id])
+//   server Server     @relation(fields: [serverId], references: [id])
+//   stat   ClientStat @relation(fields: [statId], references: [id])
+
+//   @@index([userId], name: "UserPackageUserIdIndex")
+//   @@index([serverId], name: "UserPackageServerIdIndex")
+//   @@index([statId], name: "UserPackageStatIdIndex")
+// }
+
+// model DailyUsage {
+//   id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   date         DateTime @default(now()) // Track usage by date
+//   dataUsed     BigInt // Total data used on this day
+//   clientStatId String   @db.Uuid
+
+//   clientStat ClientStat @relation(fields: [clientStatId], references: [id])
+
+//   @@unique([date, clientStatId], name: "UniqueDailyUsagePerClient")
+// }

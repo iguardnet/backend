@@ -57,6 +57,9 @@ const config: Config = {
     report: process.env.REPORT_GROUP_ID!,
     backup: process.env.BACKUP_GROUP_ID!,
   },
+  xui: {
+    password: process.env.XUI_PASSWORD!,
+  },
 };
 
 // eslint-disable-next-line import/no-default-export

@@ -13,10 +13,13 @@ import { AuthModule } from './auth/auth.module';
 import config from './common/configs/config';
 import type { Telegraf } from './common/configs/config.interface';
 import { sessionMiddleware } from './common/middleware/session.middleware';
+import { ConnectionModule } from './connection/connection.module';
 import { GqlConfigService } from './gql-config.service';
 import { MinioClientModule } from './minio/minio.module';
+import { ServerModule } from './server/server.module';
 import { TelegramModule } from './telegram/telegram.module';
 import { UsersModule } from './users/users.module';
+import { XuiModule } from './xui/xui.module';
 
 @Module({
   imports: [
@@ -50,6 +53,9 @@ import { UsersModule } from './users/users.module';
       }),
     }),
     TelegramModule,
+    ConnectionModule,
+    ServerModule,
+    XuiModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver],
