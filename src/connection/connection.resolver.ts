@@ -27,8 +27,8 @@ export class ConnectionResolver {
   }
 
   @Mutation(() => Connection)
-  getConnection(@UserEntity() user: User, @Args('country') country: ServerCountry): Promise<Connection> {
-    return this.connectionService.getConnection(user, country);
+  getConnection(@UserEntity() user: User, @Args('country') country: string): Promise<Connection> {
+    return this.connectionService.getConnection(user, country as ServerCountry);
   }
 
   // @UseGuards(GqlAuthGuard)
