@@ -51,6 +51,9 @@ export class ServerFullInfo extends Server {
 
 @ObjectType()
 export class Connection extends BaseModel {
+  @Field()
+  ip: string;
+
   @Field(() => ServerCountry)
   country: ServerCountry;
 
@@ -68,4 +71,7 @@ export class TrafficUsage extends BaseModel {
 
   @Field(() => BigNumberScalar)
   gigabyte: bigint;
+
+  @Field(() => Boolean)
+  isLimitReached: boolean;
 }

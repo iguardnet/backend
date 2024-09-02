@@ -61,6 +61,8 @@ export class ConnectionService {
     let totalUsage = BigInt(0);
     let lastTotalUsage = BigInt(0);
 
+    const clientInfo = await this.prisma.clientInfo.findFirst();
+
     const userStats = await this.prisma.clientStat.findMany({
       where: { userId: user.id, deletedAt: null },
     });
@@ -71,6 +73,8 @@ export class ConnectionService {
     }
 
     const byte = totalUsage - lastTotalUsage;
+    const dailyTrafficLimit = (clientInfo?.android as JsonObject)?.dailyTrafficLimit || 0;
+    const isLimitReached = dailyTrafficLimit * 1024 * 1024 < byte;
 
     return {
       id,
@@ -79,6 +83,7 @@ export class ConnectionService {
       byte,
       megabyte: bytesToMB(byte),
       gigabyte: bytesToGB(byte),
+      isLimitReached,
     };
   }
 
@@ -107,6 +112,7 @@ export class ConnectionService {
 
       return {
         id: alreadyConnection.id,
+        ip: server.ip,
         config: getVlessLink(alreadyConnection.id, alreadyConnection.server.tunnelDomain, country),
         country,
         createdAt: alreadyConnection.createdAt,
@@ -118,6 +124,7 @@ export class ConnectionService {
 
     return {
       id: newConnection.id,
+      ip: server.ip,
       config: getVlessLink(newConnection.id, server.tunnelDomain, country),
       country,
       createdAt: newConnection.createdAt,

@@ -43,6 +43,7 @@ model User {
 
 // android
 // {
+//   "dailyTrafficLimit": "1.2.1",
 //   "currentVersion": "1.2.1",
 //   "foreUpdateVersion": "1.1.0"
 // }
