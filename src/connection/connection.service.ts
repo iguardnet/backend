@@ -15,9 +15,10 @@ import { errors } from '../common/errors';
 import { bytesToGB, bytesToMB, getCountryName, getVlessLink } from '../common/helpers';
 import { Context } from '../common/interfaces/context.interface';
 import { MinioClientService } from '../minio/minio.service';
+import { Server, ServerFullInfo } from '../server/models/server.model';
 import { User } from '../users/models/user.model';
 import { XuiService } from '../xui/xui.service';
-import { Connection, Server, ServerFullInfo, TrafficUsage } from './models/connection.model';
+import { Connection, TrafficUsage } from './models/connection.model';
 
 @Injectable()
 export class ConnectionService {

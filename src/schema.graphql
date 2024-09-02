@@ -124,6 +124,7 @@ type ServerFullInfo {
   id: ID!
   ip: String!
   isPremium: Boolean!
+  tunnelDomain: String!
   type: ServerCountry!
 
   """Identifies the date and time when the object was last updated."""

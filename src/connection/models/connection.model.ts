@@ -8,47 +8,6 @@ import { GraphQLJSON } from 'graphql-type-json';
 import { BaseModel } from '../../common/models/base.model';
 import { BigNumberScalar } from '../../common/scalars/bigNumber';
 
-registerEnumType(ServerCountry, {
-  name: 'ServerCountry',
-  description: 'ServerCountry',
-});
-
-@ObjectType()
-export class Server extends BaseModel {
-  @Field(() => ServerCountry)
-  type: ServerCountry;
-
-  @Field()
-  ip: string;
-
-  @HideField()
-  domain: string;
-
-  @HideField()
-  inboundId: number;
-
-  @HideField()
-  token: string;
-
-  @HideField()
-  tunnelDomain: string;
-
-  @HideField()
-  stats?: Prisma.JsonValue | null;
-
-  @Field(() => Boolean)
-  isPremium: boolean;
-}
-
-@ObjectType()
-export class ServerFullInfo extends Server {
-  @Field()
-  country: string;
-
-  @Field()
-  flagUrl: string;
-}
-
 @ObjectType()
 export class Connection extends BaseModel {
   @Field()

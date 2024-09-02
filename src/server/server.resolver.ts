@@ -7,7 +7,6 @@ import { UserEntity } from '../common/decorators/user.decorator';
 import { User } from '../users/models/user.model';
 import { CreateServerInput } from './dto/createServer.input';
 import { IssueCertInput } from './dto/issueCert.input';
-import { Server } from './models/server.model';
 import { ServerService } from './server.service';
 
 @Resolver()

@@ -15,7 +15,6 @@ import { MinioClientService } from '../minio/minio.service';
 import { XuiService } from '../xui/xui.service';
 import { CreateServerInput } from './dto/createServer.input';
 import { IssueCertInput } from './dto/issueCert.input';
-import { Server } from './models/server.model';
 
 @Injectable()
 export class ServerService {

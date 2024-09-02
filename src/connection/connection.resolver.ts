@@ -7,10 +7,10 @@ import { PrismaService } from 'nestjs-prisma';
 import { GqlAuthGuard } from '../auth/gql-auth.guard';
 import { UserEntity } from '../common/decorators/user.decorator';
 import { BigNumberScalar } from '../common/scalars/bigNumber';
+import { Server, ServerFullInfo } from '../server/models/server.model';
 import { User } from '../users/models/user.model';
 import { ConnectionService } from './connection.service';
-import { CreateServerInput } from './dto/createServer.input';
-import { Connection, ServerFullInfo, TrafficUsage } from './models/connection.model';
+import { Connection, TrafficUsage } from './models/connection.model';
 
 @Resolver()
 @UseGuards(GqlAuthGuard)
