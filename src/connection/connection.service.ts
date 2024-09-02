@@ -43,13 +43,12 @@ export class ConnectionService {
 
   async getAvailableServer(req: RequestType): Promise<ServerFullInfo[]> {
     const servers = await this.prisma.server.findMany({ where: { deletedAt: null } });
-    const protocol = req.protocol;
     const host = req.get('host');
 
     return servers.map((server) => ({
       ...server,
       country: getCountryName(server.type),
-      flagUrl: `${protocol}://${host}/file/iguard/countries/${server.type.toLowerCase()}.svg`,
+      flagUrl: `https://${host}/file/iguard/countries/${server.type.toLowerCase()}.svg`,
     }));
   }
 
