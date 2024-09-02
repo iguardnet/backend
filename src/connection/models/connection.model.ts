@@ -41,6 +41,15 @@ export class Server extends BaseModel {
 }
 
 @ObjectType()
+export class ServerFullInfo extends Server {
+  @Field()
+  country: string;
+
+  @Field()
+  flagUrl: string;
+}
+
+@ObjectType()
 export class Connection extends BaseModel {
   @Field(() => ServerCountry)
   country: ServerCountry;

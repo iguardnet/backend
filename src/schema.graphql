@@ -79,7 +79,7 @@ input LoginInput {
 }
 
 type Mutation {
-  getConnection(country: ServerCountry!): Connection!
+  getConnection(country: String!): Connection!
   login(input: LoginInput!): Login!
   refreshToken(token: JWT!): Token!
   setFirebaseId(input: SetFirebaseIdInput!): String!
@@ -93,7 +93,7 @@ type Query {
   hello(name: String!): String!
   helloWorld: String!
   me: UserWithClientInfo!
-  servers: [Server!]!
+  servers: [ServerFullInfo!]!
 }
 
 """User role"""
@@ -101,18 +101,6 @@ enum Role {
   ADMIN
   PRO_USER
   USER
-}
-
-type Server {
-  """Identifies the date and time when the object was created."""
-  createdAt: DateTime!
-  id: ID!
-  ip: String!
-  isPremium: Boolean!
-  type: ServerCountry!
-
-  """Identifies the date and time when the object was last updated."""
-  updatedAt: DateTime!
 }
 
 """ServerCountry"""
@@ -124,6 +112,21 @@ enum ServerCountry {
   SG
   TR
   US
+}
+
+type ServerFullInfo {
+  country: String!
+
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  flagUrl: String!
+  id: ID!
+  ip: String!
+  isPremium: Boolean!
+  type: ServerCountry!
+
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
 }
 
 input SetFirebaseIdInput {

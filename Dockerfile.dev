@@ -4,7 +4,7 @@ RUN apk update && apk upgrade
 RUN apk add --no-cache \
   openssh \
   rsync \
-  postgresql-client \
+  postgresql16-client \
   curl \
   openssl \
   socat \

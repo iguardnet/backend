@@ -318,3 +318,9 @@ export function getDateTimeString() {
 
 // Percent from 100
 export const pFrom100 = (number?: number | null): number => (typeof number === 'number' ? number / 100 : 0);
+
+export const getCountryName = (countryCode: string): string => {
+  const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+
+  return regionNames.of(countryCode.toUpperCase()) || 'Unknown Country Code';
+};

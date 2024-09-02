@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
 import { BadRequestException, Injectable, Logger, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Interval } from '@nestjs/schedule';
 import { ServerCountry } from '@prisma/client';
+import type { Request as RequestType } from 'express';
 import fs from 'fs';
 import { customAlphabet } from 'nanoid';
 import { PrismaService } from 'nestjs-prisma';
@@ -12,13 +12,12 @@ import { v4 as uuid } from 'uuid';
 
 import { PostgresConfig, TelGroup } from '../common/configs/config.interface';
 import { errors } from '../common/errors';
-import { asyncShellExec, bytesToGB, bytesToMB, getVlessLink } from '../common/helpers';
+import { bytesToGB, bytesToMB, getCountryName, getVlessLink } from '../common/helpers';
 import { Context } from '../common/interfaces/context.interface';
 import { MinioClientService } from '../minio/minio.service';
 import { User } from '../users/models/user.model';
 import { XuiService } from '../xui/xui.service';
-import { CreateServerInput } from './dto/createServer.input';
-import { Connection, Server, TrafficUsage } from './models/connection.model';
+import { Connection, Server, ServerFullInfo, TrafficUsage } from './models/connection.model';
 
 @Injectable()
 export class ConnectionService {
@@ -42,8 +41,16 @@ export class ConnectionService {
 
   private readonly backupGroup = this.configService.get<TelGroup>('telGroup')!.backup;
 
-  getAvailableServer(): Promise<Server[]> {
-    return this.prisma.server.findMany({ where: { deletedAt: null } });
+  async getAvailableServer(req: RequestType): Promise<ServerFullInfo[]> {
+    const servers = await this.prisma.server.findMany({ where: { deletedAt: null } });
+    const protocol = req.protocol;
+    const host = req.get('host');
+
+    return servers.map((server) => ({
+      ...server,
+      country: getCountryName(server.type),
+      flagUrl: `${protocol}://${host}/file/iguard/countries/${server.type.toLowerCase()}.svg`,
+    }));
   }
 
   getBestServer(country: ServerCountry): Promise<Server> {

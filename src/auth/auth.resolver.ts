@@ -1,5 +1,5 @@
 import { Optional, UseGuards } from '@nestjs/common';
-import { Args, Context, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import type { Request as RequestType } from 'express';
 
 import { GqlAuthGuard, OptionalGqlAuthGuard } from '../auth/gql-auth.guard';

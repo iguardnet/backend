@@ -1,6 +1,7 @@
-import { NotAcceptableException, UseGuards } from '@nestjs/common';
-import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ServerCountry } from '@prisma/client';
+import type { Request as RequestType } from 'express';
 import { PrismaService } from 'nestjs-prisma';
 
 import { GqlAuthGuard } from '../auth/gql-auth.guard';
@@ -9,16 +10,16 @@ import { BigNumberScalar } from '../common/scalars/bigNumber';
 import { User } from '../users/models/user.model';
 import { ConnectionService } from './connection.service';
 import { CreateServerInput } from './dto/createServer.input';
-import { Connection, Server, TrafficUsage } from './models/connection.model';
+import { Connection, ServerFullInfo, TrafficUsage } from './models/connection.model';
 
 @Resolver()
 @UseGuards(GqlAuthGuard)
 export class ConnectionResolver {
   constructor(private connectionService: ConnectionService, private prisma: PrismaService) {}
 
-  @Query(() => [Server])
-  servers(@UserEntity() _user: User): Promise<Server[]> {
-    return this.connectionService.getAvailableServer();
+  @Query(() => [ServerFullInfo])
+  servers(@UserEntity() _user: User, @Context() context: { req: RequestType }): Promise<ServerFullInfo[]> {
+    return this.connectionService.getAvailableServer(context.req);
   }
 
   @Query(() => TrafficUsage)
