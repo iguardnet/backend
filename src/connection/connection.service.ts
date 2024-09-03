@@ -50,6 +50,7 @@ export class ConnectionService {
       ...server,
       country: getCountryName(server.type),
       flagUrl: `https://${host}/file/iguard/countries/${server.type.toLowerCase()}.svg`,
+      pingURL: `https://${server.domain}/v`,
     }));
   }
 

@@ -277,7 +277,7 @@ export class XuiService {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.toString() : String(error);
       console.error('Error update ClientStats:', errorMessage);
-      void this.bot.telegram.sendMessage(this.reportGroup, `Error update ClientStats.\n\n${errorMessage}`);
+      await this.bot.telegram.sendMessage(this.reportGroup, `Error update ClientStats.\n\n${errorMessage}`);
     }
   }
 
@@ -317,7 +317,7 @@ export class XuiService {
     });
 
     if (!res.data.success) {
-      void this.bot.telegram.sendMessage(this.reportGroup, `Couldn't addClient from ${server.domain}.`);
+      await this.bot.telegram.sendMessage(this.reportGroup, `Couldn't addClient from ${server.domain}.`);
 
       throw new BadRequestException(errors.xui.addClientError);
     }
@@ -472,11 +472,11 @@ export class XuiService {
     const queue = new PQueue({ concurrency: 1, interval: 1000, intervalCap: 1 });
 
     for (const unusedStatId of unusedStatIds) {
-      void queue.add(async () => {
+      await queue.add(async () => {
         try {
           await this.deleteClient(unusedStatId);
         } catch (deleteError) {
-          this.handleError(`Failed to delete client with ID ${unusedStatId} on ${server.domain}`, deleteError);
+          await this.handleError(`Failed to delete client with ID ${unusedStatId} on ${server.domain}`, deleteError);
         }
       });
     }
@@ -484,9 +484,9 @@ export class XuiService {
     await queue.onIdle(); // Ensure all tasks are complete
   }
 
-  private handleError(message: string, error: unknown) {
+  private async handleError(message: string, error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    void this.bot.telegram.sendMessage(this.reportGroup, `${message}\n\n${errorMessage}`);
+    await this.bot.telegram.sendMessage(this.reportGroup, `${message}\n\n${errorMessage}`);
     console.error(`${message}:`, error);
   }
 
@@ -518,13 +518,13 @@ export class XuiService {
           isBuffer: true,
         });
 
-        void this.bot.telegram.sendDocument(this.backupGroup, {
+        await this.bot.telegram.sendDocument(this.backupGroup, {
           source: res.data,
           filename: `${server.domain}-${getDateTimeString()}.db`,
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.toString() : String(error);
-        void this.bot.telegram.sendMessage(
+        await this.bot.telegram.sendMessage(
           this.reportGroup,
           `Couldn't get backup from ${server.domain}.\n\n${errorMessage}`,
         );
@@ -532,7 +532,7 @@ export class XuiService {
     }
   }
 
-  @Interval('syncClientStats', 0.5 * 60 * 1000)
+  @Interval('syncClientStats', 1 * 60 * 1000)
   async syncClientStats() {
     this.logger.debug('SyncClientStats called every 1 min');
     const servers = await this.prisma.server.findMany({ where: { deletedAt: null } });
@@ -545,7 +545,7 @@ export class XuiService {
         await this.upsertClientStats(updatedClientStats, server.id, onlinesStat);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.toString() : String(error);
-        void this.bot.telegram.sendMessage(
+        await this.bot.telegram.sendMessage(
           this.reportGroup,
           `Couldn't update stats of ${server.domain} server.\n\n${errorMessage}`,
         );
@@ -563,7 +563,7 @@ export class XuiService {
         const unusedStatIds = await this.getUnusedStatIds(server.id);
         await this.deleteUnusedClients(unusedStatIds, server);
       } catch (error) {
-        this.handleError(`Couldn't process unused clients of ${server.domain}.`, error);
+        await this.handleError(`Couldn't process unused clients of ${server.domain}.`, error);
       }
     }
   }

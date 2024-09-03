@@ -272,7 +272,7 @@ export class ServerService {
 
       const buffer = fs.readFileSync(`${outputFile}.gz`);
 
-      void this.bot.telegram.sendDocument(this.backupGroup, { source: buffer, filename: `${outputFile}.gz` });
+      await this.bot.telegram.sendDocument(this.backupGroup, { source: buffer, filename: `${outputFile}.gz` });
 
       await asyncShellExec(`rm -rf ${outputFile}.gz`);
     } catch (error_) {
@@ -284,7 +284,7 @@ export class ServerService {
 
       postgresLogs += '\nPostgres backup finished with some errors.';
 
-      void this.bot.telegram.sendMessage(this.reportGroup, `Couldn't get backup from Postgres.\n\n${postgresLogs}`);
+      await this.bot.telegram.sendMessage(this.reportGroup, `Couldn't get backup from Postgres.\n\n${postgresLogs}`);
     }
 
     return postgresLogs;
