@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Context, Query, Resolver } from '@nestjs/graphql';
+import type { Request as RequestType } from 'express';
 import { PrismaService } from 'nestjs-prisma';
 
 import { GqlAuthGuard } from '../auth/gql-auth.guard';
@@ -15,8 +16,8 @@ export class UsersResolver {
 
   @UseGuards(GqlAuthGuard)
   @Query(() => UserWithClientInfo)
-  me(@UserEntity() user: User): Promise<UserWithClientInfo> {
-    return this.usersService.getUser(user);
+  me(@UserEntity() user: User, @Context() context: { req: RequestType }): Promise<UserWithClientInfo> {
+    return this.usersService.getUser(user, context.req);
   }
 
   // @UseGuards(GqlAuthGuard)

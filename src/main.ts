@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
@@ -11,7 +12,7 @@ import { AppModule } from './app.module';
 import type { CorsConfig, NestConfig, SwaggerConfig } from './common/configs/config.interface';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Validation
   app.useGlobalPipes(new ValidationPipe());
@@ -20,6 +21,7 @@ async function bootstrap() {
   app.use(urlencoded({ extended: true, limit: '50mb' }));
   app.use('/graphql', graphqlUploadExpress({ maxFileSize: 10_000_000, maxFiles: 10 }));
   app.use(cookieParser());
+  app.set('trust proxy', true);
 
   // enable shutdown hook
   app.enableShutdownHooks();

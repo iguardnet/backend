@@ -124,6 +124,7 @@ type ServerFullInfo {
   id: ID!
   ip: String!
   isPremium: Boolean!
+  pingURL: String!
   tunnelDomain: String!
   type: ServerCountry!
 
@@ -202,6 +203,7 @@ type UserWithClientInfo {
   id: ID!
   name: String
   phone: String
+  requestIP: String!
   role: Role!
   signInProvider: SignInProvider
 

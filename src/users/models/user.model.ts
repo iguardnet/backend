@@ -65,4 +65,7 @@ export class ClientInfo extends BaseModel {
 export class UserWithClientInfo extends User {
   @Field(() => ClientInfo, { nullable: true })
   clientInfo?: ClientInfo | null;
+
+  @Field()
+  requestIP: string;
 }
