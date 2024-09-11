@@ -22,9 +22,11 @@ export class UsersService {
       ip = ip.slice(7);
     }
 
+    const requestIP = typeof ip === 'string' ? ip.split(',')[0] : 'IP';
+
     const client = await this.prisma.clientInfo.findFirst();
 
-    return { ...user, clientInfo: client, requestIP: ip as string };
+    return { ...user, clientInfo: client, requestIP };
   }
 
   // async changePassword(userId: string, userPassword: string, changePassword: ChangePasswordInput) {

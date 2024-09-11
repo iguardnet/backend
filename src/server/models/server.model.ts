@@ -37,8 +37,8 @@ export class Server extends BaseModel {
   @Field(() => Boolean)
   isPremium: boolean;
 
-  @Field(() => String)
-  pingURL?: string | null;
+  // @Field(() => String)
+  // pingURL?: string | null;
 }
 
 @ObjectType()
