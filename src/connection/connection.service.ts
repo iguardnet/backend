@@ -49,7 +49,7 @@ export class ConnectionService {
     return servers.map((server) => ({
       ...server,
       country: getCountryName(server.type),
-      flagUrl: `https://${host}/file/iguard/countries/${server.type.toLowerCase()}.svg`,
+      flagUrl: `https://${host}/file/iguard/countries/${server.type.toLowerCase()}.png`,
       pingURL: `https://${server.domain}/v`,
     }));
   }
