@@ -9,7 +9,7 @@ import { AuthService } from './auth.service';
 import { LoginInput } from './dto/login.input';
 import { RefreshTokenInput } from './dto/refresh-token.input';
 import { SetFirebaseIdInput } from './dto/setFirebaseId.input';
-import { SignupInput } from './dto/signup.input';
+import { VerifyGoogleSubscriptionInput } from './dto/verifyGoogleSubscription.input';
 import { Auth } from './models/auth.model';
 import { Login } from './models/login.model';
 import { Token } from './models/token.model';
@@ -44,6 +44,15 @@ export class AuthResolver {
   @Mutation(() => Login)
   async login(@Args('input') input: LoginInput, @Context() context: { req: RequestType }): Promise<Login> {
     return this.auth.login(input, context.req);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Mutation(() => Boolean)
+  async verifyGoogleSubscription(
+    @UserEntity() user: User,
+    @Args('input') input: VerifyGoogleSubscriptionInput,
+  ): Promise<true> {
+    return this.auth.verifyGoogleSubscription(user, input);
   }
 
   // @UseGuards(GqlAuthGuard)

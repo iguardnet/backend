@@ -15,7 +15,6 @@ generator dbml {
 enum Role {
   ADMIN
   USER
-  PRO_USER
 }
 
 enum SignInProvider {
@@ -38,7 +37,8 @@ model User {
   signInProvider SignInProvider?
   emailVerified  Boolean?
 
-  ClientStat ClientStat[]
+  ClientStat             ClientStat[]
+  GoogleSubscription GoogleSubscription[]
 }
 
 // android
@@ -124,6 +124,74 @@ model ClientStat {
   @@index([up], name: "ClientStatUpIndex")
   @@index([deletedAt], name: "ClientDeletedAtIndex")
 }
+
+// https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.subscriptions#SubscriptionPurchase
+
+// enum CancelReason {
+//   USER_CANCELED          // 0: User canceled the subscription.
+//   SYSTEM_CANCELED        // 1: Subscription was canceled by the system.
+//   REPLACED               // 2: Subscription was replaced with a new subscription.
+//   DEVELOPER_CANCELED     // 3: Subscription was canceled by the developer.
+// }
+
+// enum PaymentState {
+//   PAYMENT_PENDING                      // 0: Payment pending.
+//   PAYMENT_RECEIVED                     // 1: Payment received.
+//   FREE_TRIAL                           // 2: Free trial.
+//   PENDING_DEFERRED_UPGRADE_DOWNGRADE   // 3: Pending deferred upgrade/downgrade.
+// }
+
+// enum PromotionType {
+//   ONE_TIME_CODE    // 0: One-time code.
+//   VANITY_CODE      // 1: Vanity code.
+// }
+
+// enum PurchaseType {
+//   TEST   // 0: Test purchase.
+//   PROMO  // 1: Promo purchase.
+// }
+model GoogleSubscription {
+  id                          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
+  userId                      String    @db.Uuid
+  purchaseToken               String
+  packageName                 String    @db.VarChar(255)
+  subscriptionId              String    @db.VarChar(255)
+  kind                        String    @db.VarChar(255)
+  startTimeMillis             DateTime
+  expiryTimeMillis            DateTime
+  autoResumeTimeMillis        DateTime?
+  autoRenewing                Boolean
+  priceCurrencyCode           String    @db.VarChar(255)
+  priceAmountMicros           BigInt
+  countryCode                 String    @db.VarChar(255)
+  developerPayload            String
+  paymentState                Int?
+  cancelReason                Int?
+  userCancellationTimeMillis  DateTime?
+  orderId                     String    @db.VarChar(255) @unique 
+  linkedPurchaseToken         String?
+  purchaseType                Int?
+  profileName                 String?   @db.VarChar(255)
+  emailAddress                String?   @db.VarChar(255)
+  givenName                   String?   @db.VarChar(255)
+  familyName                  String?   @db.VarChar(255)
+  profileId                   String?   @db.VarChar(255)
+  acknowledgementState        Int
+  externalAccountId           String?   @db.VarChar(255)
+  promotionType               Int?
+  promotionCode               String?   @db.VarChar(255)
+  obfuscatedExternalAccountId String?   @db.VarChar(255)
+  obfuscatedExternalProfileId String?   @db.VarChar(255)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId], name: "GoogleSubscriptionUserIdIndex")
+  @@index([expiryTimeMillis], name: "GoogleSubscriptionExpiryTimeMillisIndex")
+  @@index([paymentState, cancelReason, expiryTimeMillis], name: "GoogleSubscriptionCompositeIndex")
+}
+
 
 // model UserPackage {
 //   id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid

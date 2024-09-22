@@ -1,6 +1,7 @@
 export type ENV = 'production' | 'staging' | 'development';
 export interface Config {
   env: ENV;
+  appDomain: string;
   publicIP: string;
   version: string;
   serviceName: string;

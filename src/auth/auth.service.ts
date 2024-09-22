@@ -1,22 +1,23 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { SignInProvider } from '@prisma/client';
+import { Prisma, SignInProvider } from '@prisma/client';
+import { AxiosError } from 'axios';
 import type { Request as RequestType } from 'express';
+import { androidpublisher_v3 } from 'googleapis';
 import { PrismaService } from 'nestjs-prisma';
 import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
-import { v4 as uuid } from 'uuid';
 
 import { SecurityConfig } from '../common/configs/config.interface';
-import { FirebaseConfig } from '../common/configs/firebase.config';
+import { GoogleServiceConfig } from '../common/configs/googleService.config';
 import { Context } from '../common/interfaces/context.interface';
 import { User } from '../users/models/user.model';
 import { UsersService } from '../users/users.service';
 import { TokenCookie } from './dto/jwt.dto';
 import { LoginInput } from './dto/login.input';
 import { SetFirebaseIdInput } from './dto/setFirebaseId.input';
-import { SignupInput } from './dto/signup.input';
+import { VerifyGoogleSubscriptionInput } from './dto/verifyGoogleSubscription.input';
 import { Login } from './models/login.model';
 import { Token } from './models/token.model';
 import { PasswordService } from './password.service';
@@ -38,14 +39,8 @@ export class AuthService {
     private readonly passwordService: PasswordService,
     private readonly configService: ConfigService,
     private readonly userService: UsersService,
-    private firebaseConfig: FirebaseConfig,
-  ) {
-    // setTimeout(() => {
-    //   void (async () => {
-    //     await this.verifyPurchase('mkhpljkcdagiainjejopnjei.AO-J1Oz6e1iFVMHBgkBiIQGyVIr_H8Vfu98llOikxD52IyoJyy-Ayinu4r-iIwGcVz0pZ__Z_yj0fWqA-dshmAfUEGuBxRQApA', 'com.iguard.vpn', 'monthly_subscription');
-    //   })();
-    // }, 1000);
-  }
+    private googleServiceConfig: GoogleServiceConfig,
+  ) {}
 
   private readonly reportGroupId = this.configService.get('telGroup')!.report;
 
@@ -63,7 +58,7 @@ export class AuthService {
     }
 
     try {
-      return await this.firebaseConfig.getAuth().createCustomToken(firebaseId);
+      return await this.googleServiceConfig.getFirebaseAuth().createCustomToken(firebaseId);
     } catch {
       throw new UnauthorizedException('Invalid token');
     }
@@ -151,7 +146,7 @@ export class AuthService {
   // }
 
   async login(input: LoginInput, req: RequestType): Promise<Login> {
-    const firebase = await this.firebaseConfig.getAuth().verifyIdToken(input.firebaseToken);
+    const firebase = await this.googleServiceConfig.getFirebaseAuth().verifyIdToken(input.firebaseToken);
 
     const user = await this.prisma.user.findUnique({ where: { firebaseId: firebase.uid } });
     const finalUser = await (!user
@@ -201,27 +196,104 @@ export class AuthService {
     };
   }
 
-  async verifyPurchase(purchaseToken: string, packageName: string, productId: string) {
-    const client = this.firebaseConfig.getPlayDeveloperApiClient();
+  async verifyGoogleSubscription(user: User | null, input: VerifyGoogleSubscriptionInput): Promise<true> {
+    const client = this.googleServiceConfig.getPlayDeveloperApiClient();
 
     try {
-      const response = await client.purchases.products.get({
-        packageName,
-        productId,
-        token: purchaseToken,
+      const response = await client.purchases.subscriptions.get({
+        packageName: input.packageName,
+        subscriptionId: input.subscriptionId,
+        token: input.purchaseToken,
       });
 
-      console.info('response  ===========>', response);
+      const subscription = response.data;
 
-      const purchase = response.data;
+      // Map API response to Prisma model fields
+      const data = this.mapGoogleSubscriptionToData(
+        subscription,
+        user?.id || null,
+        input.purchaseToken,
+        input.packageName,
+        input.subscriptionId,
+      );
 
-      // Handle the purchase object here (e.g., verify purchase state, handle expiration)
-      return purchase.purchaseState === 0;
+      // Upsert the subscription into the database
+      await this.prisma.googleSubscription.upsert({
+        where: { orderId: data.orderId as string },
+        update: data,
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        create: data as Prisma.GoogleSubscriptionUpsertArgs['create'],
+      });
+
+      return true;
     } catch (error) {
-      console.error('Error verifying purchase:', error);
+      if (error instanceof AxiosError && error.response?.status === 404) {
+        throw new NotFoundException('Subscription not found');
+      }
 
-      return false;
+      console.error('Error verifying subscription:', error);
+
+      throw new BadRequestException('Failed to verify subscription');
     }
+  }
+
+  private mapGoogleSubscriptionToData(
+    subscription: androidpublisher_v3.Schema$SubscriptionPurchase,
+    userId: string | null,
+    purchaseToken: string,
+    packageName: string,
+    subscriptionId: string,
+  ): Prisma.GoogleSubscriptionUpsertArgs['update'] {
+    const {
+      kind = '',
+      startTimeMillis,
+      expiryTimeMillis,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      autoRenewing = false,
+      priceCurrencyCode = '',
+      priceAmountMicros,
+      countryCode = '',
+      developerPayload = '',
+      paymentState = null,
+      cancelReason = null,
+      userCancellationTimeMillis,
+      orderId = '',
+      linkedPurchaseToken = null,
+      purchaseType = null,
+      acknowledgementState = 0,
+      externalAccountId = null,
+      promotionType = null,
+      promotionCode = null,
+      obfuscatedExternalAccountId = null,
+      obfuscatedExternalProfileId = null,
+    } = subscription;
+
+    return {
+      userId: userId || undefined,
+      purchaseToken,
+      packageName,
+      subscriptionId,
+      kind: kind!,
+      startTimeMillis: new Date(Number(startTimeMillis)),
+      expiryTimeMillis: new Date(Number(expiryTimeMillis)),
+      autoRenewing: autoRenewing!,
+      priceCurrencyCode: priceCurrencyCode!,
+      priceAmountMicros: priceAmountMicros ? BigInt(priceAmountMicros) : BigInt(0),
+      countryCode: countryCode!,
+      developerPayload: developerPayload!,
+      paymentState,
+      cancelReason,
+      userCancellationTimeMillis: userCancellationTimeMillis ? new Date(Number(userCancellationTimeMillis)) : null,
+      orderId: orderId!,
+      linkedPurchaseToken,
+      purchaseType,
+      acknowledgementState: acknowledgementState!,
+      externalAccountId,
+      promotionType,
+      promotionCode,
+      obfuscatedExternalAccountId,
+      obfuscatedExternalProfileId,
+    };
   }
 
   logout(req: RequestType): void {

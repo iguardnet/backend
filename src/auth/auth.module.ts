@@ -4,7 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
 import { SecurityConfig } from '../common/configs/config.interface';
-import { FirebaseConfig } from '../common/configs/firebase.config';
+import { GoogleServiceConfig } from '../common/configs/googleService.config';
 import { UsersModule } from '../users/users.module';
 import { UsersService } from '../users/users.service';
 import { AuthResolver } from './auth.resolver';
@@ -31,7 +31,7 @@ import { PasswordService } from './password.service';
     }),
     UsersModule,
   ],
-  providers: [AuthService, AuthResolver, JwtStrategy, GqlAuthGuard, PasswordService, UsersService, FirebaseConfig],
+  providers: [AuthService, AuthResolver, JwtStrategy, GqlAuthGuard, PasswordService, UsersService, GoogleServiceConfig],
   exports: [GqlAuthGuard],
 })
 export class AuthModule {}

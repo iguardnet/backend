@@ -16,6 +16,7 @@ Table User {
   signInProvider SignInProvider
   emailVerified Boolean
   ClientStat ClientStat [not null]
+  GoogleSubscription GoogleSubscription [not null]
 }
 
 Table ClientInfo {
@@ -74,10 +75,46 @@ Table ClientStat {
   server Server [not null]
 }
 
+Table GoogleSubscription {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  userId String [not null]
+  purchaseToken String [not null]
+  packageName String [not null]
+  subscriptionId String [not null]
+  kind String [not null]
+  startTimeMillis DateTime [not null]
+  expiryTimeMillis DateTime [not null]
+  autoResumeTimeMillis DateTime
+  autoRenewing Boolean [not null]
+  priceCurrencyCode String [not null]
+  priceAmountMicros BigInt [not null]
+  countryCode String [not null]
+  developerPayload String [not null]
+  paymentState Int
+  cancelReason Int
+  userCancellationTimeMillis DateTime
+  orderId String [unique, not null]
+  linkedPurchaseToken String
+  purchaseType Int
+  profileName String
+  emailAddress String
+  givenName String
+  familyName String
+  profileId String
+  acknowledgementState Int [not null]
+  externalAccountId String
+  promotionType Int
+  promotionCode String
+  obfuscatedExternalAccountId String
+  obfuscatedExternalProfileId String
+  user User [not null]
+}
+
 Enum Role {
   ADMIN
   USER
-  PRO_USER
 }
 
 Enum SignInProvider {
@@ -99,3 +136,5 @@ Enum ServerCountry {
 Ref: ClientStat.userId > User.id
 
 Ref: ClientStat.serverId > Server.id
+
+Ref: GoogleSubscription.userId > User.id

@@ -60,6 +60,7 @@ const config: Config = {
   xui: {
     password: process.env.XUI_PASSWORD!,
   },
+  appDomain: process.env.APP_DOMAIN!,
 };
 
 // eslint-disable-next-line import/no-default-export

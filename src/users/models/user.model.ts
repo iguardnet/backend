@@ -7,6 +7,7 @@ import { IsMobilePhone } from 'class-validator';
 import { GraphQLJSON } from 'graphql-type-json';
 
 import { BaseModel } from '../../common/models/base.model';
+import { GoogleSubscription } from './subscription.model';
 
 registerEnumType(Role, {
   name: 'Role',
@@ -62,10 +63,22 @@ export class ClientInfo extends BaseModel {
 }
 
 @ObjectType()
-export class UserWithClientInfo extends User {
+export class FullUser extends User {
   @Field(() => ClientInfo, { nullable: true })
   clientInfo?: ClientInfo | null;
 
   @Field()
   requestIP: string;
+
+  @Field(() => GoogleSubscription, { nullable: true })
+  activeGoogleSubscription?: GoogleSubscription | null;
+}
+
+@ObjectType()
+export class GoogleAllSubscriptions extends BaseModel {
+  @Field(() => GoogleSubscription, { nullable: true })
+  activeGoogleSubscription?: GoogleSubscription | null;
+
+  @Field(() => [GoogleSubscription])
+  googleSubscriptions: GoogleSubscription[];
 }

@@ -51,8 +51,78 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type FullUser {
+  activeGoogleSubscription: GoogleSubscription
+  clientInfo: ClientInfo
+
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  deviceId: String
+  email: String
+  emailVerified: Boolean
+  firebaseId: String
+  id: ID!
+  name: String
+  phone: String
+  requestIP: String!
+  role: Role!
+  signInProvider: SignInProvider
+
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+}
+
 input GetClientStatsFiltersInput {
   id: String!
+}
+
+type GoogleAllSubscriptions {
+  activeGoogleSubscription: GoogleSubscription
+
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  googleSubscriptions: [GoogleSubscription!]!
+  id: ID!
+
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+}
+
+type GoogleSubscription {
+  acknowledgementState: Int!
+  autoRenewing: Boolean!
+  countryCode: String!
+
+  """Identifies the date and time when the object was created."""
+  createdAt: DateTime!
+  developerPayload: String!
+  expiryTimeMillis: DateTime!
+  id: ID!
+  kind: String!
+  orderId: String!
+  priceAmountMicros: BigNumber!
+  priceCurrencyCode: String!
+  startTimeMillis: DateTime!
+  status: GoogleSubscriptionStatus!
+  subscriptionId: String!
+
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: DateTime!
+}
+
+"""Google Subscription Status"""
+enum GoogleSubscriptionStatus {
+  ACTIVE
+  CANCELED_BY_DEVELOPER
+  CANCELED_BY_SYSTEM
+  CANCELED_BY_USER
+  EXPIRED
+  FREE_TRIAL
+  PAYMENT_PENDING
+  PENDING_UPGRADE_DOWNGRADE
+  REFUNDED
+  REPLACED
+  UNKNOWN
 }
 
 """
@@ -85,22 +155,23 @@ type Mutation {
   refreshToken(token: JWT!): Token!
   setFirebaseId(input: SetFirebaseIdInput!): String!
   uploadImage(input: UploadInput!): String!
+  verifyGoogleSubscription(input: VerifyGoogleSubscriptionInput!): Boolean!
 }
 
 type Query {
   clientStats(filters: GetClientStatsFiltersInput!): [ClientStat!]!
   getCustomToken(deviceId: String!): String!
   getUsage: TrafficUsage!
+  googleSubscriptions: GoogleAllSubscriptions!
   hello(name: String!): String!
   helloWorld: String!
-  me: UserWithClientInfo!
+  me: FullUser!
   servers: [ServerFullInfo!]!
 }
 
 """User role"""
 enum Role {
   ADMIN
-  PRO_USER
   USER
 }
 
@@ -124,7 +195,6 @@ type ServerFullInfo {
   id: ID!
   ip: String!
   isPremium: Boolean!
-  pingURL: String!
   tunnelDomain: String!
   type: ServerCountry!
 
@@ -191,22 +261,8 @@ type User {
   updatedAt: DateTime!
 }
 
-type UserWithClientInfo {
-  clientInfo: ClientInfo
-
-  """Identifies the date and time when the object was created."""
-  createdAt: DateTime!
-  deviceId: String
-  email: String
-  emailVerified: Boolean
-  firebaseId: String
-  id: ID!
-  name: String
-  phone: String
-  requestIP: String!
-  role: Role!
-  signInProvider: SignInProvider
-
-  """Identifies the date and time when the object was last updated."""
-  updatedAt: DateTime!
+input VerifyGoogleSubscriptionInput {
+  packageName: String!
+  purchaseToken: String!
+  subscriptionId: String!
 }
