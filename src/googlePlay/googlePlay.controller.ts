@@ -121,7 +121,7 @@ export class GooglePlayController {
   }
 
   async verifyPubSubJwtToken(authorizationHeader: string): Promise<boolean> {
-    const isDev = this.configService.get<ENV>('env');
+    const isDev = this.configService.get<ENV>('env') === 'development';
     const audience = isDev
       ? `https://${this.configService.get('appDomain')}/${controllerName}/${googlePlayIAPWebhookUrl}`
       : `https://${this.configService.get('appDomain')}/api/${controllerName}/${googlePlayIAPWebhookUrl}`;
