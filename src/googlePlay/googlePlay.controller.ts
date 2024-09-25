@@ -177,11 +177,15 @@ export class GooglePlayController {
     if (notification.subscriptionNotification) {
       const { notificationType, purchaseToken, subscriptionId } = notification.subscriptionNotification;
 
-      await this.authService.verifyGoogleSubscription(null, {
-        packageName,
-        subscriptionId,
-        purchaseToken,
-      });
+      try {
+        await this.authService.verifyGoogleSubscription(null, {
+          packageName,
+          subscriptionId,
+          purchaseToken,
+        });
+      } catch (error) {
+        console.error('Error verifying subscription in processNotification:', error);
+      }
     }
   }
 }
