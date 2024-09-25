@@ -6,6 +6,6 @@ import { GooglePlayController } from './googlePlay.controller';
 
 @Module({
   imports: [AuthModule],
-  providers: [GooglePlayController, AuthService],
+  controllers: [GooglePlayController],
 })
 export class GooglePlayModule {}

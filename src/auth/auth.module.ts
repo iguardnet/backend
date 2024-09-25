@@ -32,6 +32,6 @@ import { PasswordService } from './password.service';
     UsersModule,
   ],
   providers: [AuthService, AuthResolver, JwtStrategy, GqlAuthGuard, PasswordService, UsersService, GoogleServiceConfig],
-  exports: [GqlAuthGuard],
+  exports: [GqlAuthGuard, AuthService],
 })
 export class AuthModule {}

@@ -14,6 +14,7 @@ import config from './common/configs/config';
 import type { Telegraf } from './common/configs/config.interface';
 import { sessionMiddleware } from './common/middleware/session.middleware';
 import { ConnectionModule } from './connection/connection.module';
+import { GooglePlayModule } from './googlePlay/googlePlay.module';
 import { GqlConfigService } from './gql-config.service';
 import { MinioClientModule } from './minio/minio.module';
 import { ServerModule } from './server/server.module';
@@ -56,6 +57,7 @@ import { XuiModule } from './xui/xui.module';
     ConnectionModule,
     ServerModule,
     XuiModule,
+    GooglePlayModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver],

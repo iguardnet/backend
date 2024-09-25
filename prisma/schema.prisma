@@ -37,7 +37,7 @@ model User {
   signInProvider SignInProvider?
   emailVerified  Boolean?
 
-  ClientStat             ClientStat[]
+  ClientStat         ClientStat[]
   GoogleSubscription GoogleSubscription[]
 }
 
@@ -154,7 +154,7 @@ model GoogleSubscription {
   id                          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt                   DateTime  @default(now())
   updatedAt                   DateTime  @updatedAt
-  userId                      String    @db.Uuid
+  userId                      String?   @db.Uuid
   purchaseToken               String
   packageName                 String    @db.VarChar(255)
   subscriptionId              String    @db.VarChar(255)
@@ -170,7 +170,7 @@ model GoogleSubscription {
   paymentState                Int?
   cancelReason                Int?
   userCancellationTimeMillis  DateTime?
-  orderId                     String    @db.VarChar(255) @unique 
+  orderId                     String    @unique @db.VarChar(255)
   linkedPurchaseToken         String?
   purchaseType                Int?
   profileName                 String?   @db.VarChar(255)
@@ -185,13 +185,12 @@ model GoogleSubscription {
   obfuscatedExternalAccountId String?   @db.VarChar(255)
   obfuscatedExternalProfileId String?   @db.VarChar(255)
 
-  user User @relation(fields: [userId], references: [id])
+  user User? @relation(fields: [userId], references: [id])
 
   @@index([userId], name: "GoogleSubscriptionUserIdIndex")
   @@index([expiryTimeMillis], name: "GoogleSubscriptionExpiryTimeMillisIndex")
   @@index([paymentState, cancelReason, expiryTimeMillis], name: "GoogleSubscriptionCompositeIndex")
 }
-
 
 // model UserPackage {
 //   id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid

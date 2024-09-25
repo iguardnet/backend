@@ -1,12 +1,14 @@
-import { Body, Controller, Headers, HttpStatus, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpStatus, Logger, Post, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { plainToInstance, Type } from 'class-transformer';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, validate, ValidateNested } from 'class-validator';
 import { Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import { PrismaService } from 'nestjs-prisma';
 
 import { AuthService } from '../auth/auth.service';
-import { GoogleServiceConfig } from '../common/configs/googleService.config';
+import { ENV } from '../common/configs/config.interface';
 
 interface PubSubMessage {
   attributes?: Record<string, string>;
@@ -22,19 +24,34 @@ interface PubSubRequestBody {
   subscription?: string;
 }
 
-interface SubscriptionNotification {
+class SubscriptionNotificationDto {
+  @IsNumber()
+  @IsNotEmpty()
   notificationType: number;
+
+  @IsString()
+  @IsNotEmpty()
   purchaseToken: string;
+
+  @IsString()
+  @IsNotEmpty()
   subscriptionId: string;
 }
 
-interface Notification {
+class NotificationDto {
+  @IsString()
+  @IsNotEmpty()
   packageName: string;
-  subscriptionNotification?: SubscriptionNotification;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => SubscriptionNotificationDto)
+  subscriptionNotification?: SubscriptionNotificationDto;
 }
 
+const controllerName = 'googlePlay';
 const googlePlayIAPWebhookUrl = 'googlePlayIAPWebhook';
-@Controller('googlePlay')
+@Controller(controllerName)
 export class GooglePlayController {
   constructor(
     private readonly prisma: PrismaService,
@@ -42,12 +59,22 @@ export class GooglePlayController {
     private readonly authService: AuthService,
   ) {}
 
+  private readonly logger = new Logger(GooglePlayController.name);
+
+  @Get()
+  test() {
+    console.info('API is OK');
+
+    return 'API is OK';
+  }
+
   @Post(googlePlayIAPWebhookUrl)
   async handleWebhook(
     @Headers('Authorization') authorization: string,
     @Body() body: PubSubRequestBody,
     @Res() res: Response,
   ) {
+    this.logger.debug('HandleWebhook (googlePlayIAPWebhookUrl) called');
     // Step 1: Verify the JWT token in the Authorization header
     const isValid = await this.verifyPubSubJwtToken(authorization);
 
@@ -62,8 +89,29 @@ export class GooglePlayController {
       return res.status(HttpStatus.BAD_REQUEST).send('Invalid message format');
     }
 
-    const messageData = Buffer.from(pubsubMessage.data, 'base64').toString('utf-8');
-    const notification = JSON.parse(messageData);
+    let messageData: string;
+
+    try {
+      messageData = Buffer.from(pubsubMessage.data, 'base64').toString('utf-8');
+    } catch {
+      return res.status(HttpStatus.BAD_REQUEST).send('Invalid base64 data');
+    }
+
+    let notification: NotificationDto;
+
+    try {
+      const plainObject = JSON.parse(messageData);
+      notification = plainToInstance(NotificationDto, plainObject);
+    } catch {
+      return res.status(HttpStatus.OK).send('Invalid JSON data');
+    }
+
+    // Validate the notification object
+    const errors = await validate(notification);
+
+    if (errors.length > 0) {
+      return res.status(HttpStatus.OK).send('Invalid notification data');
+    }
 
     // Step 3: Process the notification
     await this.processNotification(notification);
@@ -73,7 +121,10 @@ export class GooglePlayController {
   }
 
   async verifyPubSubJwtToken(authorizationHeader: string): Promise<boolean> {
-    const audience = `${this.configService.get('appDomain')}/${googlePlayIAPWebhookUrl}`;
+    const isDev = this.configService.get<ENV>('env');
+    const audience = isDev
+      ? `https://${this.configService.get('appDomain')}/${controllerName}/${googlePlayIAPWebhookUrl}`
+      : `https://${this.configService.get('appDomain')}/api/${controllerName}/${googlePlayIAPWebhookUrl}`;
 
     if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
       return false;
@@ -90,7 +141,7 @@ export class GooglePlayController {
 
       const kid = decodedHeader.header.kid;
       const client = jwksClient({
-        jwksUri: 'https://www.googleapis.com/oauth2/v1/certs',
+        jwksUri: 'https://www.googleapis.com/oauth2/v3/certs',
       });
 
       const key = await new Promise<jwksClient.SigningKey | undefined>((resolve, reject) => {
@@ -102,6 +153,7 @@ export class GooglePlayController {
           }
         });
       });
+
       const signingKey = key?.getPublicKey();
 
       jwt.verify(token, signingKey, {
@@ -119,7 +171,7 @@ export class GooglePlayController {
     }
   }
 
-  async processNotification(notification: Notification) {
+  async processNotification(notification: NotificationDto) {
     const packageName = notification.packageName;
 
     if (notification.subscriptionNotification) {
