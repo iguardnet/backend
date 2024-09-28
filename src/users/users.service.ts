@@ -186,6 +186,20 @@ export class UsersService {
     };
   }
 
+  async hasActiveSubscription(userId: string): Promise<boolean> {
+    const activeSubscription = await this.prisma.googleSubscription.findFirst({
+      where: {
+        userId,
+        expiryTimeMillis: { gte: new Date() },
+        paymentState: { in: [1, 2] },
+        OR: [{ cancelReason: null }, { cancelReason: undefined }],
+      },
+      select: { id: true }, // Only select the ID for performance
+    });
+
+    return activeSubscription !== null;
+  }
+
   // async changePassword(userId: string, userPassword: string, changePassword: ChangePasswordInput) {
   //   const isPasswordValid = await this.passwordService.validatePassword(changePassword.oldPassword, userPassword);
 

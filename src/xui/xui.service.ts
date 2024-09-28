@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { HttpService } from '@nestjs/axios';
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Interval } from '@nestjs/schedule';
 import { ClientStat as PrismaClientStat, Prisma, Server } from '@prisma/client';
@@ -15,7 +15,7 @@ import { firstValueFrom } from 'rxjs';
 import { Telegraf } from 'telegraf';
 import { v4 as uuid } from 'uuid';
 
-import { TelGroup } from '../common/configs/config.interface';
+import { ENV, TelGroup } from '../common/configs/config.interface';
 import { errors } from '../common/errors';
 import {
   excludeFromArr,
@@ -66,11 +66,7 @@ export class XuiService {
     private prisma: PrismaService,
     private httpService: HttpService,
     private readonly configService: ConfigService,
-  ) {
-    // setTimeout(() => {
-    //   void this.resetTrafficUsage();
-    // }, 2000);
-  }
+  ) {}
 
   private readonly logger = new Logger(XuiService.name);
 
@@ -475,8 +471,15 @@ export class XuiService {
       await queue.add(async () => {
         try {
           await this.deleteClient(unusedStatId);
+          await this.prisma.clientStat.delete({ where: { id: unusedStatId } });
         } catch (deleteError) {
           await this.handleError(`Failed to delete client with ID ${unusedStatId} on ${server.domain}`, deleteError);
+        }
+
+        try {
+          await this.prisma.clientStat.update({ where: { id: unusedStatId }, data: { deletedAt: new Date() } });
+        } catch {
+          // continue regardless of error
         }
       });
     }
@@ -553,14 +556,39 @@ export class XuiService {
     }
   }
 
+  async deleteInactiveClients() {
+    try {
+      await this.prisma.$executeRaw`
+        UPDATE "ClientStat"
+        SET "deletedAt" = NOW()
+        WHERE
+          "lastConnectedAt" <= NOW() - INTERVAL '2 days'
+          OR ("lastConnectedAt" IS NULL AND "createdAt" <= NOW() - INTERVAL '2 days')
+      `;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.toString() : String(error);
+      console.error('Error soft-deleting inactive clients:', errorMessage);
+      await this.bot.telegram.sendMessage(this.reportGroup, `Error soft-deleting inactive clients.\n\n${errorMessage}`);
+    }
+  }
+
   @Interval('RemoveUnusedClients', 24 * 60 * 60 * 1000)
   async removeUnusedClients() {
+    const isDev = this.configService.get<ENV>('env') === 'development';
+
+    if (isDev) {
+      return;
+    }
+
+    await this.deleteInactiveClients();
+
     this.logger.debug('RemoveUnusedClients called every 24 hours');
     const servers = await this.prisma.server.findMany({ where: { deletedAt: null } });
 
     for (const server of servers) {
       try {
         const unusedStatIds = await this.getUnusedStatIds(server.id);
+
         await this.deleteUnusedClients(unusedStatIds, server);
       } catch (error) {
         await this.handleError(`Couldn't process unused clients of ${server.domain}.`, error);

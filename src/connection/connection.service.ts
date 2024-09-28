@@ -14,9 +14,9 @@ import { PostgresConfig, TelGroup } from '../common/configs/config.interface';
 import { errors } from '../common/errors';
 import { bytesToGB, bytesToMB, getCountryName, getVlessLink } from '../common/helpers';
 import { Context } from '../common/interfaces/context.interface';
-import { MinioClientService } from '../minio/minio.service';
 import { Server, ServerFullInfo } from '../server/models/server.model';
 import { User } from '../users/models/user.model';
+import { UsersService } from '../users/users.service';
 import { XuiService } from '../xui/xui.service';
 import { Connection, TrafficUsage } from './models/connection.model';
 
@@ -26,17 +26,10 @@ export class ConnectionService {
     @InjectBot()
     private readonly bot: Telegraf<Context>,
     private prisma: PrismaService,
+    private readonly usersService: UsersService,
     private readonly configService: ConfigService,
-    private readonly minioService: MinioClientService,
     private readonly xuiService: XuiService,
-  ) {
-    // setTimeout(() => {
-    //   (async () => {
-    //     const user = await this.prisma.user.findFirst();
-    //     void this.getConnection(user, 'FI');
-    //   })();
-    // }, 2000);
-  }
+  ) {}
 
   private readonly logger = new Logger(ConnectionService.name);
 
@@ -91,7 +84,9 @@ export class ConnectionService {
   async getConnection(user: User, country: ServerCountry): Promise<Connection> {
     const server = await this.getBestServer(country);
 
-    if (user.role === 'USER' && server.isPremium) {
+    const hasUserActiveSubscription = await this.usersService.hasActiveSubscription(user.id);
+
+    if (server.isPremium && !hasUserActiveSubscription) {
       throw new NotAcceptableException(`${country} server is for premium users only.`);
     }
 
