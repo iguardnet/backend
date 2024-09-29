@@ -43,6 +43,7 @@ export class UsersService {
   }
 
   async getFullUser(user: User, req: RequestType): Promise<FullUser> {
+    const nowUTC = new Date(Date.now() + new Date().getTimezoneOffset() * 60000);
     // Fetch the user with only their active subscriptions
     const fullUser = await this.prisma.user.findUniqueOrThrow({
       where: { id: user.id },
@@ -61,7 +62,7 @@ export class UsersService {
           where: {
             AND: [
               // Subscription has not expired
-              { expiryTimeMillis: { gte: new Date() } },
+              { expiryTimeMillis: { gte: nowUTC } },
               // Payment state is 'Payment received' or 'Free trial'
               { paymentState: { in: [1, 2] } },
               // Cancel reason is null (not canceled)
@@ -131,8 +132,8 @@ export class UsersService {
   }
 
   async getGoogleSubscriptions(user: User): Promise<GoogleAllSubscriptions> {
+    
     // Fetch the user along with their subscriptions
-
     const subscriptions = await this.prisma.googleSubscription.findMany({
       where: {
         userId: user.id,
@@ -142,14 +143,14 @@ export class UsersService {
       },
     });
 
-    const currentTime = new Date();
+    const nowUTC = new Date(Date.now() + new Date().getTimezoneOffset() * 60000);
 
     // Map subscriptions with their statuses
     const googleSubscriptions: GoogleSubscription[] = subscriptions.map((sub) => {
       let status: GoogleSubscriptionStatus = GoogleSubscriptionStatus.UNKNOWN;
 
       // Check if subscription is expired
-      if (sub.expiryTimeMillis < currentTime) {
+      if (sub.expiryTimeMillis < nowUTC) {
         status = GoogleSubscriptionStatus.EXPIRED;
       } else {
         // Map payment state
@@ -187,10 +188,11 @@ export class UsersService {
   }
 
   async hasActiveSubscription(userId: string): Promise<boolean> {
+    const nowUTC = new Date(Date.now() + new Date().getTimezoneOffset() * 60000);
     const activeSubscription = await this.prisma.googleSubscription.findFirst({
       where: {
         userId,
-        expiryTimeMillis: { gte: new Date() },
+        expiryTimeMillis: { gte: nowUTC },
         paymentState: { in: [1, 2] },
         OR: [{ cancelReason: null }, { cancelReason: undefined }],
       },
