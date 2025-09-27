@@ -20,6 +20,7 @@ import { errors } from '../common/errors';
 import {
   excludeFromArr,
   getDateTimeString,
+  isIPAddress,
   isSessionExpired,
   isUUID,
   jsonObjectToQueryString,
@@ -41,7 +42,9 @@ import {
 } from './xui.types';
 
 const ENDPOINTS = (domain: string) => {
-  const url = `https://${domain}/v`;
+  // Use HTTP for IP addresses, HTTPS for domain names
+  const protocol = isIPAddress(domain) ? 'http' : 'https';
+  const url = `${protocol}://${domain}/v`;
 
   return {
     login: `${url}/login`,
@@ -83,12 +86,16 @@ export class XuiService {
             // eslint-disable-next-line @typescript-eslint/naming-convention
             'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
           },
-          httpsAgent: new https.Agent({
-            rejectUnauthorized: false,
-          }),
+          ...(isIPAddress(domain)
+            ? {
+                httpsAgent: new https.Agent({
+                  rejectUnauthorized: false,
+                }),
+              }
+            : {}),
         }),
       );
-      const cookie = login?.headers['set-cookie']?.[1];
+      const cookie = login?.headers['set-cookie']?.[1] || login?.headers['set-cookie']?.[0];
 
       if (!cookie) {
         throw new NotFoundException(errors.xui.accountNotFound);
@@ -133,12 +140,16 @@ export class XuiService {
 
     const config: AxiosRequestConfig = {
       headers: { ...(headers || {}), cookie: auth },
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: false,
-      }),
       maxContentLength: 10_485_760,
       ...(isBuffer && { responseType: 'arraybuffer' }),
     };
+
+    // Only add httpsAgent for HTTPS requests (domain names)
+    if (!isIPAddress(server.domain)) {
+      config.httpsAgent = new https.Agent({
+        rejectUnauthorized: false,
+      });
+    }
 
     return firstValueFrom(
       method === 'get'

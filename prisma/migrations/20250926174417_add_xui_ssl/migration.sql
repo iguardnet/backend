@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Server" ADD COLUMN     "xuiSSL" BOOLEAN NOT NULL DEFAULT false;

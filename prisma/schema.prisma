@@ -76,12 +76,18 @@ enum ServerCountry {
   SG
 }
 
+enum InboundType {
+  VLESS_TCP
+  VLESS_WS_TLS
+}
+
 model Server {
   id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   deletedAt    DateTime?
   type         ServerCountry
+  port         Int           @default(443)
   ip           String        @db.VarChar(255)
   domain       String        @db.VarChar(255)
   inboundId    Int           @default(1)
@@ -89,6 +95,7 @@ model Server {
   tunnelDomain String        @db.VarChar(255)
   stats        Json?
   isPremium    Boolean       @default(true)
+  inboundType  InboundType   @default(VLESS_TCP)
 
   clientStat ClientStat[]
 }

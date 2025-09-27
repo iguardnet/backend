@@ -1,14 +1,18 @@
 import 'reflect-metadata';
 
 import { Field, HideField, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
-import type { Prisma } from '@prisma/client';
-import { ServerCountry } from '@prisma/client';
+import { InboundType, Prisma, ServerCountry } from '@prisma/client';
 
 import { BaseModel } from '../../common/models/base.model';
 
 registerEnumType(ServerCountry, {
   name: 'ServerCountry',
   description: 'ServerCountry',
+});
+
+registerEnumType(InboundType, {
+  name: 'InboundType',
+  description: 'InboundType',
 });
 
 @ObjectType()
@@ -30,6 +34,12 @@ export class Server extends BaseModel {
 
   @Field()
   tunnelDomain: string;
+
+  @Field(() => Int)
+  port: number;
+
+  @Field(() => InboundType)
+  inboundType: InboundType;
 
   @HideField()
   stats?: Prisma.JsonValue | null;

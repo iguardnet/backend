@@ -12,7 +12,7 @@ import { v4 as uuid } from 'uuid';
 
 import { PostgresConfig, TelGroup } from '../common/configs/config.interface';
 import { errors } from '../common/errors';
-import { bytesToGB, bytesToMB, getCountryName, getVlessLink } from '../common/helpers';
+import { bytesToGB, bytesToMB, getConfigLink, getCountryName } from '../common/helpers';
 import { Context } from '../common/interfaces/context.interface';
 import { Server, ServerFullInfo } from '../server/models/server.model';
 import { User } from '../users/models/user.model';
@@ -109,7 +109,13 @@ export class ConnectionService {
       return {
         id: alreadyConnection.id,
         ip: server.ip,
-        config: getVlessLink(alreadyConnection.id, alreadyConnection.server.tunnelDomain, country),
+        config: getConfigLink({
+          id: alreadyConnection.id,
+          tunnelDomain: alreadyConnection.server.tunnelDomain,
+          name: country,
+          port: alreadyConnection.server.port,
+          inboundType: alreadyConnection.server.inboundType,
+        }),
         country,
         createdAt: alreadyConnection.createdAt,
         updatedAt: alreadyConnection.updatedAt,
@@ -121,8 +127,15 @@ export class ConnectionService {
     return {
       id: newConnection.id,
       ip: server.ip,
-      config: getVlessLink(newConnection.id, server.tunnelDomain, country),
+      // config: getVlessLink(newConnection.id, server.tunnelDomain, country),
       country,
+      config: getConfigLink({
+        id: newConnection.id,
+        tunnelDomain: server.tunnelDomain,
+        name: country,
+        port: server.port,
+        inboundType: server.inboundType,
+      }),
       createdAt: newConnection.createdAt,
       updatedAt: newConnection.updatedAt,
     };

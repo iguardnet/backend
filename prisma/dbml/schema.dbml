@@ -42,6 +42,7 @@ Table Server {
   updatedAt DateTime [not null]
   deletedAt DateTime
   type ServerCountry [not null]
+  port Int [not null, default: 443]
   ip String [not null]
   domain String [not null]
   inboundId Int [not null, default: 1]
@@ -49,6 +50,7 @@ Table Server {
   tunnelDomain String [not null]
   stats Json
   isPremium Boolean [not null, default: true]
+  inboundType InboundType [not null, default: 'VLESS_TCP']
   clientStat ClientStat [not null]
 }
 
@@ -131,6 +133,11 @@ Enum ServerCountry {
   FI
   US
   SG
+}
+
+Enum InboundType {
+  VLESS_TCP
+  VLESS_WS_TLS
 }
 
 Ref: ClientStat.userId > User.id
