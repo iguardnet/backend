@@ -8,6 +8,8 @@ Start => pnpm start:dev
 Create migration => pnpm migrate:dev:create
 Prisma generate types => 
 
+Note: APP_DOMAIN is important for pub / sub
+
 
 
 
